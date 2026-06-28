@@ -1,7 +1,63 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="是々日々">
-  <rect width="512" height="512" fill="#fffdf7"/>
-  <circle cx="256" cy="256" r="206" fill="#eef4f2"/>
-  <path d="M132 126h248v260H132z" fill="#ffffff" stroke="#355f8a" stroke-width="18"/>
-  <path d="M178 190h156M178 250h156M178 310h98" stroke="#262626" stroke-width="18" stroke-linecap="round"/>
-  <path d="M344 330c27-44 31-84 12-120 41 34 50 84 22 128-19 29-48 45-84 49 22-15 39-34 50-57z" fill="#3f6f61"/>
+  <defs>
+    <radialGradient id="night" cx="35%" cy="25%" r="84%">
+      <stop offset="0" stop-color="#17324a"/>
+      <stop offset="0.58" stop-color="#0b2033"/>
+      <stop offset="1" stop-color="#061724"/>
+    </radialGradient>
+    <linearGradient id="moon" x1="187" x2="333" y1="131" y2="381">
+      <stop offset="0" stop-color="#fff6d9"/>
+      <stop offset="0.48" stop-color="#d8d2bf"/>
+      <stop offset="1" stop-color="#f8efd0"/>
+    </linearGradient>
+    <filter id="grain" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence baseFrequency="0.86" numOctaves="2" seed="11" type="fractalNoise"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 0.1"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#night)"/>
+  <rect width="512" height="512" fill="#ffffff" filter="url(#grain)" opacity="0.28"/>
+  <g transform="translate(12 8) scale(0.95)">
+    <path
+      d="M327 108c-72 12-131 68-148 143-19 83 27 167 105 195-53 13-113-2-157-43-76-71-81-190-10-266 54-58 137-75 210-29Z"
+      fill="url(#moon)"
+    />
+    <path
+      d="M34 262c70-8 116 1 159 21 58 27 116 31 168 3 39-21 71-58 114-62"
+      fill="none"
+      stroke="#8e8a80"
+      stroke-linecap="round"
+      stroke-width="26"
+      opacity="0.5"
+    />
+    <path
+      d="M40 296c96-26 156 37 236 40 75 3 130-48 197-26"
+      fill="none"
+      stroke="#b8b1a2"
+      stroke-linecap="round"
+      stroke-width="13"
+      opacity="0.55"
+    />
+    <path
+      d="M91 354c75-16 119 39 190 44 58 4 92-23 135-54"
+      fill="none"
+      stroke="#d7bb77"
+      stroke-linecap="round"
+      stroke-width="4"
+      opacity="0.88"
+    />
+    <path
+      d="M99 378c37-45 63-60 96-78"
+      fill="none"
+      stroke="#caa86c"
+      stroke-linecap="round"
+      stroke-width="5"
+      opacity="0.8"
+    />
+    <path d="M105 348c-1-28 17-49 41-62 4 29-12 51-41 62Z" fill="#748067"/>
+    <path d="M143 374c4-27 25-44 53-51 0 27-20 46-53 51Z" fill="#8c9674"/>
+  </g>
 </svg>

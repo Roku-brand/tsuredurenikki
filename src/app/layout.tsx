@@ -8,6 +8,14 @@ export const metadata: Metadata = {
   },
   description: "日々の記録を静かに残し、探し、振り返るための個人用日記PWA",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" }
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }]
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -16,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fffdf7",
+  themeColor: "#071927",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover"
