@@ -15,7 +15,7 @@ Supabase と Next.js App Router で作る、スマホ中心の個人用日記PWA
 
 ## セットアップ
 
-1. `.env.example` を参考に `.env.local` を作成します。
+1. `.env.example` を参考に `.env.local` を作成します。Supabaseの新UIでは `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` を使います。
 2. Supabase SQL Editor で `supabase/schema.sql` を実行します。
 3. 依存関係を入れて起動します。
 
