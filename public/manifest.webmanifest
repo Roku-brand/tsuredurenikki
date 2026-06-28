@@ -1,0 +1,25 @@
+{
+  "name": "是々日々",
+  "short_name": "是々日々",
+  "description": "日々の出来事、感情、生活ログを残す個人用日記PWA",
+  "start_url": "/app/today",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fffdf7",
+  "theme_color": "#fffdf7",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/maskable-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

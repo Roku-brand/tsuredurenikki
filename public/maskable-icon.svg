@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="是々日々">
+  <rect width="512" height="512" fill="#fffdf7"/>
+  <circle cx="256" cy="256" r="206" fill="#eef4f2"/>
+  <path d="M132 126h248v260H132z" fill="#ffffff" stroke="#355f8a" stroke-width="18"/>
+  <path d="M178 190h156M178 250h156M178 310h98" stroke="#262626" stroke-width="18" stroke-linecap="round"/>
+  <path d="M344 330c27-44 31-84 12-120 41 34 50 84 22 128-19 29-48 45-84 49 22-15 39-34 50-57z" fill="#3f6f61"/>
+</svg>
