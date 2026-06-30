@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { ButtonLink } from "@/components/ui/button";
 import { addMonths, formatJapaneseDate, toDateInputValue } from "@/lib/utils/date";
 import type { DiaryEntry } from "@/types/database";
 
@@ -20,6 +19,17 @@ function fulfillmentLabel(value: number | null) {
   if (value === 3) return "B";
   if (value === 1) return "C";
   return "";
+}
+
+function monthTitle(month: string) {
+  const [year, monthIndex] = month.split("-");
+  return `${year}年 ${Number(monthIndex)}月`;
+}
+
+function weekdayTone(index: number) {
+  if (index % 7 === 0) return "text-[#ff4b4b]";
+  if (index % 7 === 6) return "text-[#3867ff]";
+  return "text-[#24393c]";
 }
 
 export function CalendarMonthView({
@@ -61,47 +71,48 @@ export function CalendarMonthView({
 
   return (
     <div
-      className="flex h-full min-h-0 touch-pan-x flex-col gap-3 overflow-hidden"
+      className="flex h-full min-h-0 touch-pan-x flex-col gap-2 overflow-hidden text-[#002b2f]"
       onTouchStart={(event) => {
         touchStartX.current = event.touches[0].clientX;
         touchStartY.current = event.touches[0].clientY;
       }}
       onTouchEnd={onTouchEnd}
     >
-      <header className="flex shrink-0 items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold sm:text-2xl">{month.replace("-", "年")}月</h1>
-          <p className="text-sm text-neutral-500">{entries.length}日分の記録</p>
-        </div>
-        <div className="flex gap-2">
-          <ButtonLink href={`/app/calendar?month=${addMonths(month, -1)}`} variant="secondary" aria-label="前月">
+      <header className="relative grid h-14 shrink-0 place-items-center rounded-full bg-white/95 shadow-[0_10px_28px_rgba(16,24,40,0.10)]">
+        <Link
+          href={`/app/calendar?month=${addMonths(month, -1)}`}
+          aria-label="前月"
+          className="focus-ring absolute left-3 grid size-9 place-items-center rounded-full bg-white text-[#1d6c66] shadow-[0_2px_10px_rgba(16,24,40,0.12)]"
+        >
             <ChevronLeft size={16} />
-          </ButtonLink>
-          <ButtonLink href="/app/calendar" variant="secondary">
-            今月
-          </ButtonLink>
-          <ButtonLink href={`/app/calendar?month=${addMonths(month, 1)}`} variant="secondary" aria-label="翌月">
+        </Link>
+        <h1 className="text-[21px] font-semibold">{monthTitle(month)}</h1>
+        <Link
+          href={`/app/calendar?month=${addMonths(month, 1)}`}
+          aria-label="翌月"
+          className="focus-ring absolute right-3 grid size-9 place-items-center rounded-full bg-white text-[#1d6c66] shadow-[0_2px_10px_rgba(16,24,40,0.12)]"
+        >
             <ChevronRight size={16} />
-          </ButtonLink>
-        </div>
+        </Link>
       </header>
+
+      <div className="grid shrink-0 grid-cols-7 px-px text-center text-sm">
+        {weekdays.map((weekday, index) => (
+          <div key={weekday} className={["py-1.5", weekdayTone(index)].join(" ")}>
+            {weekday}
+          </div>
+        ))}
+      </div>
 
       <section
         className={[
-          "calendar-page grid min-h-0 flex-1 grid-rows-[auto_1fr] overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)] shadow-soft",
+          "calendar-page grid min-h-0 flex-1 overflow-hidden rounded-[18px] border border-[#d7e1e8] bg-[#d7e1e8]",
           turning === "next" ? "calendar-page-next" : "",
           turning === "prev" ? "calendar-page-prev" : ""
         ].join(" ")}
       >
-        <div className="grid grid-cols-7 border-b border-[var(--border)] text-center text-xs font-medium text-neutral-500">
-          {weekdays.map((weekday) => (
-            <div key={weekday} className="py-2">
-              {weekday}
-            </div>
-          ))}
-        </div>
-        <div className="grid min-h-0 grid-cols-7 grid-rows-6 gap-px overflow-hidden bg-[var(--border)]">
-          {days.map((day) => {
+        <div className="grid min-h-0 grid-cols-7 grid-rows-6 gap-px overflow-hidden">
+          {days.map((day, index) => {
             const entry = byDate.get(day.date);
             const fulfillment = fulfillmentLabel(entry?.fulfillment_level ?? null);
             const isToday = day.date === today;
@@ -110,23 +121,27 @@ export function CalendarMonthView({
                 key={day.date}
                 href={`/app/today?date=${day.date}`}
                 className={[
-                  "focus-ring relative flex min-h-0 flex-col bg-[var(--surface)] p-2 transition hover:bg-mist/70",
-                  !day.inMonth ? "text-neutral-400 opacity-60" : "",
-                  isToday ? "ring-2 ring-inset ring-lake" : ""
+                  "focus-ring relative flex min-h-0 flex-col bg-[#fbfdfb] p-2 transition hover:bg-[#eef7f2]",
+                  !day.inMonth ? "text-[#b9c6c7]" : weekdayTone(index),
+                  isToday ? "z-10 ring-2 ring-inset ring-[#2f8c7a]" : ""
                 ].join(" ")}
                 aria-label={`${formatJapaneseDate(day.date)}の記録を開く`}
               >
                 <span
                   className={[
-                    "grid size-7 place-items-center rounded-full text-sm font-semibold",
-                    isToday ? "bg-lake text-white" : ""
+                    "absolute right-2 top-1 text-base font-medium",
+                    isToday ? "text-[#002b2f]" : ""
                   ].join(" ")}
                 >
                   {Number(day.date.slice(8))}
                 </span>
-                {entry ? <p className="mt-1 line-clamp-2 text-xs font-medium leading-5">{entry.title || "無題"}</p> : null}
+                {entry ? (
+                  <p className="m-auto line-clamp-2 max-w-[80%] text-center text-sm font-medium leading-5 text-[#00383c]">
+                    {entry.title || "無題"}
+                  </p>
+                ) : null}
                 {fulfillment ? (
-                  <span className="absolute bottom-2 right-2 grid size-7 place-items-center rounded-full bg-moss text-xs font-semibold text-white">
+                  <span className="absolute bottom-2 right-2 grid size-5 place-items-center rounded-full bg-[#52cfa5] text-xs font-semibold text-[#00383c]">
                     {fulfillment}
                   </span>
                 ) : null}

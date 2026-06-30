@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Bed,
-  CalendarCheck,
   CheckCircle2,
   ChevronRight,
   Clock3,
@@ -12,11 +11,14 @@ import {
   Image as ImageIcon,
   Moon,
   Pencil,
+  Plus,
   Save,
   Scale,
-  Sun
+  Sun,
+  Trash2,
+  X
 } from "lucide-react";
-import { upsertDiaryEntryAction } from "@/server/actions/diary";
+import { deleteDiaryEntryAction, upsertDiaryEntryAction } from "@/server/actions/diary";
 import type { DiaryEntry } from "@/types/database";
 
 type FormState = {
@@ -37,6 +39,7 @@ type FormState = {
 };
 
 const fulfillmentOptions = [
+  ["", "未入力"],
   ["5", "A"],
   ["3", "B"],
   ["1", "C"]
@@ -75,8 +78,13 @@ function dateLabel(value: string) {
 function lineCount(value: string) {
   return value
     .split(/\r?\n/)
-    .map((line) => line.trim())
+    .map((line) => line.replace(/^[-・•]\s*/, "").trim())
     .filter(Boolean).length;
+}
+
+function todoItems(value: string) {
+  const items = value.split(/\r?\n/).map((line) => line.replace(/^[-・•]\s*/, "").trim());
+  return items.length ? items : [""];
 }
 
 export function DiaryEditor({
@@ -101,7 +109,7 @@ export function DiaryEditor({
     wake_time: entry?.wake_time?.slice(0, 5) ?? "",
     bedtime: timeValue(entry?.weather),
     body_weight: entry?.body_weight?.toString() ?? "",
-    fulfillment_level: entry?.fulfillment_level?.toString() ?? "3",
+    fulfillment_level: entry?.fulfillment_level?.toString() ?? "",
     news_note: entry?.news_note ?? "",
     tomorrow_todo: entry?.tomorrow_todo ?? "",
     memo: entry?.memo ?? "",
@@ -168,6 +176,17 @@ export function DiaryEditor({
     reader.readAsDataURL(file);
   }
 
+  function deleteEntry() {
+    if (!entry?.id) return;
+    const ok = window.confirm("この日の記録を削除しますか？");
+    if (!ok) return;
+    startTransition(async () => {
+      const result = await deleteDiaryEntryAction(entry.id);
+      setMessage(result.message ?? "");
+      if (result.ok) router.refresh();
+    });
+  }
+
   useEffect(() => {
     if (!didMount.current) {
       didMount.current = true;
@@ -183,20 +202,31 @@ export function DiaryEditor({
   const saveText = status === "saving" ? "保存中" : "保存";
 
   return (
-    <form action={() => startTransition(() => void save())} className="grid gap-4 text-[#202124]">
-      <header className="flex items-center justify-between gap-4">
-        <div className="flex items-baseline gap-4">
+    <form action={() => startTransition(() => void save())} className="grid w-full min-w-0 gap-4 overflow-x-hidden text-[#202124]">
+      <header className="flex min-w-0 items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-col sm:flex-row sm:items-baseline sm:gap-4">
           <h1 className="text-[34px] font-semibold tracking-normal">記帳</h1>
-          <time className="text-[19px] font-medium text-[#30343b]">{dateLabel(form.date)}</time>
+          <time className="truncate text-[17px] font-medium text-[#30343b] sm:text-[19px]">{dateLabel(form.date)}</time>
         </div>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="focus-ring flex h-14 shrink-0 items-center gap-2 rounded-[12px] bg-[#2f638f] px-5 text-[19px] font-semibold text-white shadow-[0_10px_24px_rgba(47,99,143,0.24)]"
-        >
-          <Save size={22} />
-          {saveText}
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={deleteEntry}
+            disabled={isPending || !entry?.id}
+            aria-label="削除"
+            className="focus-ring grid h-14 w-12 place-items-center rounded-[12px] border border-[#ded2c8] bg-white text-[#4b4b4b] disabled:opacity-40"
+          >
+            <Trash2 size={21} />
+          </button>
+          <button
+            type="submit"
+            disabled={isPending}
+            className="focus-ring flex h-14 items-center gap-2 rounded-[12px] bg-[#2f638f] px-4 text-[18px] font-semibold text-white shadow-[0_10px_24px_rgba(47,99,143,0.24)] sm:px-5 sm:text-[19px]"
+          >
+            <Save size={22} />
+            {saveText}
+          </button>
+        </div>
       </header>
 
       <input
@@ -213,13 +243,13 @@ export function DiaryEditor({
           value={form.body}
           onChange={(event) => update("body", event.target.value)}
           placeholder="今日の出来事や感じたこと"
-          className="focus-ring min-h-[128px] w-full resize-none rounded-[11px] border border-[#ded2c8] bg-white px-4 py-4 text-[19px] leading-8 outline-none placeholder:text-[#8b8b8b]"
+          className="focus-ring min-h-[220px] w-full resize-y rounded-[11px] border border-[#ded2c8] bg-white px-4 py-4 text-[19px] leading-8 outline-none placeholder:text-[#8b8b8b]"
         />
       </section>
 
       <section className="rounded-[13px] border border-[#ded2c8] bg-white p-4">
         <h2 className="mb-4 text-[22px] font-semibold">ごはん</h2>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3">
           <MealField icon={<Sun size={24} />} label="朝" value={form.breakfast} placeholder="未入力" onChange={(value) => update("breakfast", value)} />
           <MealField icon={<Sun size={24} />} label="昼" value={form.lunch} placeholder="未入力" onChange={(value) => update("lunch", value)} />
           <MealField icon={<Moon size={24} />} label="夜" value={form.dinner} placeholder="未入力" onChange={(value) => update("dinner", value)} />
@@ -228,7 +258,7 @@ export function DiaryEditor({
 
       <section className="rounded-[13px] border border-[#ded2c8] bg-white p-4">
         <h2 className="mb-4 text-[22px] font-semibold">からだ</h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
           <MetricField icon={<Clock3 size={23} />} label="起床" value={form.wake_time} type="time" onChange={(value) => update("wake_time", value)} />
           <MetricField icon={<Bed size={23} />} label="就寝" value={form.bedtime} type="time" onChange={(value) => update("bedtime", value)} />
           <ReadOnlyMetric icon={<Moon size={23} />} label="睡眠" value={sleepText(sleepHours)} subLabel="自動計算" />
@@ -243,7 +273,7 @@ export function DiaryEditor({
         </div>
 
         <h2 className="mb-3 mt-5 text-[22px] font-semibold">充実度</h2>
-        <div className="grid h-[50px] grid-cols-3 rounded-[12px] bg-[#f1f1f1] p-1">
+        <div className="grid h-[50px] min-w-0 grid-cols-4 rounded-[12px] bg-[#f1f1f1] p-1">
           {fulfillmentOptions.map(([value, label]) => {
             const active = form.fulfillment_level === value;
             return (
@@ -252,7 +282,7 @@ export function DiaryEditor({
                 type="button"
                 onClick={() => update("fulfillment_level", value)}
                 className={[
-                  "focus-ring rounded-[10px] text-[21px] font-semibold transition",
+                  "focus-ring rounded-[10px] text-[16px] font-semibold transition sm:text-[21px]",
                   active ? "bg-[#2f638f] text-white shadow-[0_8px_16px_rgba(47,99,143,0.22)]" : "text-[#5c5c5c]"
                 ].join(" ")}
               >
@@ -271,7 +301,7 @@ export function DiaryEditor({
           value={form.news_note}
           onChange={(value) => update("news_note", value)}
         />
-        <DetailRow
+        <TodoRow
           icon={<CheckCircle2 size={24} />}
           label="明日のTO DO"
           status={form.tomorrow_todo ? `${lineCount(form.tomorrow_todo)}件` : "未入力"}
@@ -309,14 +339,14 @@ function MealField({
   onChange: (value: string) => void;
 }) {
   return (
-    <label className="flex h-[68px] items-center gap-2 rounded-[10px] border border-[#ded2c8] px-3">
-      <span className="shrink-0 text-[#202124]">{icon}</span>
-      <span className="shrink-0 text-[18px] font-semibold">{label}:</span>
+    <label className="grid min-h-[78px] min-w-0 grid-cols-[30px_1fr] gap-x-2 rounded-[10px] border border-[#ded2c8] px-3 py-3">
+      <span className="row-span-2 shrink-0 text-[#202124]">{icon}</span>
+      <span className="text-[15px] font-semibold">{label}</span>
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="min-w-0 flex-1 bg-transparent text-[18px] font-semibold outline-none placeholder:font-medium placeholder:text-[#8b8b8b]"
+        className="min-w-0 bg-transparent text-[19px] font-semibold outline-none placeholder:font-medium placeholder:text-[#8b8b8b]"
       />
     </label>
   );
@@ -338,9 +368,19 @@ function MetricField({
   onChange: (value: string) => void;
 }) {
   return (
-    <label className="grid min-h-[86px] grid-cols-[32px_1fr] items-center rounded-[10px] border border-[#ded2c8] px-4 py-3">
+    <div className="grid min-h-[96px] min-w-0 grid-cols-[32px_1fr_auto] items-center rounded-[10px] border border-[#ded2c8] px-4 py-3">
       <span className="row-span-2 text-[#202124]">{icon}</span>
       <span className="text-[16px] font-semibold">{label}</span>
+      <button
+        type="button"
+        onClick={(event) => {
+          event.preventDefault();
+          onChange("");
+        }}
+        className="focus-ring row-span-2 ml-2 rounded-full px-2 py-1 text-xs font-semibold text-[#777]"
+      >
+        未入力
+      </button>
       <span className="flex items-baseline gap-1">
         <input
           type={type}
@@ -348,11 +388,13 @@ function MetricField({
           min={type === "number" ? "0" : undefined}
           value={value}
           onChange={(event) => onChange(event.target.value)}
+          placeholder="未入力"
+          aria-label={label}
           className="min-w-0 flex-1 bg-transparent text-[21px] font-semibold outline-none"
         />
         {suffix && value ? <span className="text-[21px] font-semibold">{suffix}</span> : null}
       </span>
-    </label>
+    </div>
   );
 }
 
@@ -393,10 +435,10 @@ function DetailRow({
   return (
     <details className="group border-b border-[#ebe3dc] last:border-b-0">
       <summary className="flex min-h-[72px] cursor-pointer list-none items-center gap-4 px-5 [&::-webkit-details-marker]:hidden">
-        <span className="text-[#202124]">{icon}</span>
-        <span className="flex-1 text-[19px] font-semibold">{label}</span>
-        <span className="text-[18px] text-[#777]">{status}</span>
-        <ChevronRight size={22} className="text-[#777] transition group-open:rotate-90" />
+        <span className="shrink-0 text-[#202124]">{icon}</span>
+        <span className="min-w-0 flex-1 truncate text-[19px] font-semibold">{label}</span>
+        <span className="shrink-0 text-[18px] text-[#777]">{status}</span>
+        <ChevronRight size={22} className="shrink-0 text-[#777] transition group-open:rotate-90" />
       </summary>
       <div className="px-5 pb-4">
         <textarea
@@ -404,6 +446,70 @@ function DetailRow({
           onChange={(event) => onChange(event.target.value)}
           className="focus-ring min-h-[96px] w-full resize-none rounded-[10px] border border-[#ded2c8] px-3 py-2 text-base outline-none"
         />
+      </div>
+    </details>
+  );
+}
+
+function TodoRow({
+  icon,
+  label,
+  status,
+  value,
+  onChange
+}: {
+  icon: React.ReactNode;
+  label: string;
+  status: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const items = todoItems(value);
+
+  function commit(nextItems: string[]) {
+    onChange(nextItems.join("\n"));
+  }
+
+  return (
+    <details className="group border-b border-[#ebe3dc] last:border-b-0">
+      <summary className="flex min-h-[72px] cursor-pointer list-none items-center gap-4 px-5 [&::-webkit-details-marker]:hidden">
+        <span className="shrink-0 text-[#202124]">{icon}</span>
+        <span className="min-w-0 flex-1 truncate text-[19px] font-semibold">{label}</span>
+        <span className="shrink-0 text-[18px] text-[#777]">{status}</span>
+        <ChevronRight size={22} className="shrink-0 text-[#777] transition group-open:rotate-90" />
+      </summary>
+      <div className="grid gap-2 px-5 pb-4">
+        {items.map((item, index) => (
+          <div key={index} className="grid grid-cols-[18px_1fr_32px] items-center gap-2">
+            <span className="text-xl leading-none text-[#2f638f]">•</span>
+            <input
+              value={item}
+              onChange={(event) => {
+                const nextItems = [...items];
+                nextItems[index] = event.target.value;
+                commit(nextItems);
+              }}
+              placeholder="やること"
+              className="focus-ring h-11 min-w-0 rounded-[10px] border border-[#ded2c8] px-3 outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => commit(items.filter((_, itemIndex) => itemIndex !== index))}
+              className="focus-ring grid size-8 place-items-center rounded-full text-[#777]"
+              aria-label="TO DOを削除"
+            >
+              <X size={17} />
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => commit([...items, ""])}
+          className="focus-ring mt-1 flex h-10 items-center justify-center gap-2 rounded-[10px] border border-[#ded2c8] text-sm font-semibold"
+        >
+          <Plus size={17} />
+          追加
+        </button>
       </div>
     </details>
   );
@@ -421,10 +527,10 @@ function PhotoRow({
   return (
     <details className="group">
       <summary className="flex min-h-[72px] cursor-pointer list-none items-center gap-4 px-5 [&::-webkit-details-marker]:hidden">
-        <ImageIcon size={24} />
-        <span className="flex-1 text-[19px] font-semibold">写真</span>
-        <span className="text-[18px] text-[#777]">{value ? "1枚" : "未入力"}</span>
-        <ChevronRight size={22} className="text-[#777] transition group-open:rotate-90" />
+        <ImageIcon size={24} className="shrink-0" />
+        <span className="min-w-0 flex-1 truncate text-[19px] font-semibold">写真</span>
+        <span className="shrink-0 text-[18px] text-[#777]">{value ? "1枚" : "未入力"}</span>
+        <ChevronRight size={22} className="shrink-0 text-[#777] transition group-open:rotate-90" />
       </summary>
       <div className="grid gap-3 px-5 pb-4">
         <input
