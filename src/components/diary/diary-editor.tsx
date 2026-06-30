@@ -87,6 +87,25 @@ function todoItems(value: string) {
   return items.length ? items : [""];
 }
 
+function formatWeightInput(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (trimmed.includes(".")) {
+    const [integerPart, decimalPart = ""] = trimmed.replace(/[^\d.]/g, "").split(".");
+    return decimalPart ? `${integerPart}.${decimalPart.slice(0, 1)}` : integerPart;
+  }
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.length >= 3) return `${digits.slice(0, -1)}.${digits.slice(-1)}`;
+  return digits;
+}
+
+function finalizeWeightInput(value: string) {
+  const formatted = formatWeightInput(value);
+  if (!formatted) return "";
+  const number = Number(formatted);
+  return Number.isFinite(number) ? number.toFixed(1) : "";
+}
+
 export function DiaryEditor({
   initialDate,
   entry
@@ -262,12 +281,10 @@ export function DiaryEditor({
           <MetricField icon={<Clock3 size={23} />} label="起床" value={form.wake_time} type="time" onChange={(value) => update("wake_time", value)} />
           <MetricField icon={<Bed size={23} />} label="就寝" value={form.bedtime} type="time" onChange={(value) => update("bedtime", value)} />
           <ReadOnlyMetric icon={<Moon size={23} />} label="睡眠" value={sleepText(sleepHours)} subLabel="自動計算" />
-          <MetricField
+          <WeightField
             icon={<Scale size={23} />}
             label="体重"
             value={form.body_weight}
-            type="number"
-            suffix="kg"
             onChange={(value) => update("body_weight", value)}
           />
         </div>
@@ -394,6 +411,47 @@ function MetricField({
         />
         {suffix && value ? <span className="text-[21px] font-semibold">{suffix}</span> : null}
       </span>
+    </div>
+  );
+}
+
+function WeightField({
+  icon,
+  label,
+  value,
+  onChange
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="grid min-h-[96px] min-w-0 grid-cols-[32px_1fr] rounded-[10px] border border-[#ded2c8] px-4 py-3">
+      <span className="row-span-2 pt-3 text-[#202124]">{icon}</span>
+      <div className="flex min-w-0 items-center justify-between gap-2">
+        <span className="text-[16px] font-semibold">{label}</span>
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className="focus-ring shrink-0 rounded-full px-2 py-1 text-xs font-semibold text-[#777]"
+        >
+          未入力
+        </button>
+      </div>
+      <div className="flex min-w-0 items-baseline gap-1">
+        <input
+          type="text"
+          inputMode="numeric"
+          value={value}
+          onChange={(event) => onChange(formatWeightInput(event.target.value))}
+          onBlur={(event) => onChange(finalizeWeightInput(event.target.value))}
+          placeholder="56.8"
+          aria-label={label}
+          className="min-w-0 flex-1 bg-transparent text-[21px] font-semibold outline-none placeholder:text-[#8b8b8b]"
+        />
+        <span className="shrink-0 text-[18px] font-semibold text-[#555]">kg</span>
+      </div>
     </div>
   );
 }

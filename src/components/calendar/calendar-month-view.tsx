@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -42,20 +42,31 @@ export function CalendarMonthView({
   days: CalendarDay[];
 }) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const [turning, setTurning] = useState<"next" | "prev" | null>(null);
+  const targetRef = useRef<string | null>(null);
   const today = toDateInputValue();
   const byDate = new Map(entries.map((entry) => [entry.date, entry]));
 
+  useEffect(() => {
+    setTurning(null);
+    targetRef.current = null;
+  }, [month]);
+
   function turnMonth(direction: "next" | "prev") {
-    if (turning) return;
+    if (turning || isPending) return;
     const target = addMonths(month, direction === "next" ? 1 : -1);
+    targetRef.current = target;
     setTurning(direction);
-    window.setTimeout(() => {
+    startTransition(() => {
       router.push(`/app/calendar?month=${target}`);
-      router.prefetch(`/app/calendar?month=${addMonths(target, direction === "next" ? 1 : -1)}`);
-    }, 150);
+    });
+    router.prefetch(`/app/calendar?month=${addMonths(target, direction === "next" ? 1 : -1)}`);
+    window.setTimeout(() => {
+      if (targetRef.current === target) setTurning(null);
+    }, 260);
   }
 
   function onTouchEnd(event: React.TouchEvent<HTMLDivElement>) {
@@ -129,19 +140,19 @@ export function CalendarMonthView({
               >
                 <span
                   className={[
-                    "absolute right-2 top-1 text-base font-medium",
+                    "absolute right-1.5 top-1 text-sm font-medium",
                     isToday ? "text-[#002b2f]" : ""
                   ].join(" ")}
                 >
                   {Number(day.date.slice(8))}
                 </span>
                 {entry ? (
-                  <p className="m-auto line-clamp-2 max-w-[80%] text-center text-sm font-medium leading-5 text-[#00383c]">
+                  <p className="m-auto line-clamp-2 max-w-[92%] text-center text-[13px] font-medium leading-[1.35] text-[#00383c] sm:text-sm">
                     {entry.title || "無題"}
                   </p>
                 ) : null}
                 {fulfillment ? (
-                  <span className="absolute bottom-2 right-2 grid size-5 place-items-center rounded-full bg-[#52cfa5] text-xs font-semibold text-[#00383c]">
+                  <span className="absolute bottom-1.5 right-1.5 grid size-4 place-items-center rounded-full bg-[#52cfa5] text-[10px] font-semibold text-[#00383c]">
                     {fulfillment}
                   </span>
                 ) : null}
