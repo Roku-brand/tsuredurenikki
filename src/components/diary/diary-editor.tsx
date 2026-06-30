@@ -221,11 +221,11 @@ export function DiaryEditor({
   const saveText = status === "saving" ? "保存中" : "保存";
 
   return (
-    <form action={() => startTransition(() => void save())} className="grid w-full min-w-0 gap-4 overflow-x-hidden text-[#202124]">
-      <header className="flex min-w-0 items-center justify-between gap-3">
+    <form action={() => startTransition(() => void save())} className="grid w-full min-w-0 gap-2.5 overflow-x-hidden text-[#202124] sm:gap-4">
+      <header className="flex min-w-0 items-center justify-between gap-2">
         <div className="flex min-w-0 flex-col sm:flex-row sm:items-baseline sm:gap-4">
-          <h1 className="text-[34px] font-semibold tracking-normal">記帳</h1>
-          <time className="truncate text-[17px] font-medium text-[#30343b] sm:text-[19px]">{dateLabel(form.date)}</time>
+          <h1 className="text-[26px] font-semibold tracking-normal sm:text-[34px]">記帳</h1>
+          <time className="truncate text-[14px] font-medium text-[#30343b] sm:text-[19px]">{dateLabel(form.date)}</time>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button
@@ -233,16 +233,16 @@ export function DiaryEditor({
             onClick={deleteEntry}
             disabled={isPending || !entry?.id}
             aria-label="削除"
-            className="focus-ring grid h-14 w-12 place-items-center rounded-[12px] border border-[#ded2c8] bg-white text-[#4b4b4b] disabled:opacity-40"
+            className="focus-ring grid h-10 w-10 place-items-center rounded-[10px] border border-[#ded2c8] bg-white text-[#4b4b4b] disabled:opacity-40 sm:h-14 sm:w-12 sm:rounded-[12px]"
           >
-            <Trash2 size={21} />
+            <Trash2 size={18} />
           </button>
           <button
             type="submit"
             disabled={isPending}
-            className="focus-ring flex h-14 items-center gap-2 rounded-[12px] bg-[#2f638f] px-4 text-[18px] font-semibold text-white shadow-[0_10px_24px_rgba(47,99,143,0.24)] sm:px-5 sm:text-[19px]"
+            className="focus-ring flex h-10 items-center gap-1.5 rounded-[10px] bg-[#2f638f] px-3 text-[15px] font-semibold text-white shadow-[0_10px_24px_rgba(47,99,143,0.24)] sm:h-14 sm:gap-2 sm:rounded-[12px] sm:px-5 sm:text-[19px]"
           >
-            <Save size={22} />
+            <Save size={18} />
             {saveText}
           </button>
         </div>
@@ -253,31 +253,31 @@ export function DiaryEditor({
         value={form.title}
         onChange={(event) => update("title", event.target.value)}
         placeholder="今日の題名"
-        className="focus-ring h-[62px] rounded-[13px] border border-[#ded2c8] bg-white px-4 text-[22px] outline-none placeholder:text-[#8b8b8b]"
+        className="focus-ring h-11 rounded-[10px] border border-[#ded2c8] bg-white px-3 text-[17px] outline-none placeholder:text-[#8b8b8b] sm:h-[62px] sm:rounded-[13px] sm:px-4 sm:text-[22px]"
       />
 
-      <section className="rounded-[13px] border border-[#ded2c8] bg-white p-4">
-        <h2 className="mb-4 text-[22px] font-semibold">本文</h2>
+      <section className="rounded-[10px] border border-[#ded2c8] bg-white p-3 sm:rounded-[13px] sm:p-4">
+        <h2 className="mb-2 text-[17px] font-semibold sm:mb-4 sm:text-[22px]">本文</h2>
         <textarea
           value={form.body}
           onChange={(event) => update("body", event.target.value)}
           placeholder="今日の出来事や感じたこと"
-          className="focus-ring min-h-[220px] w-full resize-y rounded-[11px] border border-[#ded2c8] bg-white px-4 py-4 text-[19px] leading-8 outline-none placeholder:text-[#8b8b8b]"
+          className="focus-ring min-h-[124px] w-full resize-y rounded-[9px] border border-[#ded2c8] bg-white px-3 py-2.5 text-[15px] leading-6 outline-none placeholder:text-[#8b8b8b] sm:min-h-[220px] sm:rounded-[11px] sm:px-4 sm:py-4 sm:text-[19px] sm:leading-8"
         />
       </section>
 
-      <section className="rounded-[13px] border border-[#ded2c8] bg-white p-4">
-        <h2 className="mb-4 text-[22px] font-semibold">ごはん</h2>
-        <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3">
+      <section className="rounded-[10px] border border-[#ded2c8] bg-white p-3 sm:rounded-[13px] sm:p-4">
+        <h2 className="mb-2 text-[17px] font-semibold sm:mb-4 sm:text-[22px]">ごはん</h2>
+        <div className="grid min-w-0 grid-cols-3 gap-2 sm:gap-3">
           <MealField icon={<Sun size={24} />} label="朝" value={form.breakfast} placeholder="未入力" onChange={(value) => update("breakfast", value)} />
           <MealField icon={<Sun size={24} />} label="昼" value={form.lunch} placeholder="未入力" onChange={(value) => update("lunch", value)} />
           <MealField icon={<Moon size={24} />} label="夜" value={form.dinner} placeholder="未入力" onChange={(value) => update("dinner", value)} />
         </div>
       </section>
 
-      <section className="rounded-[13px] border border-[#ded2c8] bg-white p-4">
-        <h2 className="mb-4 text-[22px] font-semibold">からだ</h2>
-        <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+      <section className="rounded-[10px] border border-[#ded2c8] bg-white p-3 sm:rounded-[13px] sm:p-4">
+        <h2 className="mb-2 text-[17px] font-semibold sm:mb-4 sm:text-[22px]">からだ</h2>
+        <div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-3">
           <MetricField icon={<Clock3 size={23} />} label="起床" value={form.wake_time} type="time" onChange={(value) => update("wake_time", value)} />
           <MetricField icon={<Bed size={23} />} label="就寝" value={form.bedtime} type="time" onChange={(value) => update("bedtime", value)} />
           <ReadOnlyMetric icon={<Moon size={23} />} label="睡眠" value={sleepText(sleepHours)} subLabel="自動計算" />
@@ -289,8 +289,8 @@ export function DiaryEditor({
           />
         </div>
 
-        <h2 className="mb-3 mt-5 text-[22px] font-semibold">充実度</h2>
-        <div className="grid h-[50px] min-w-0 grid-cols-4 rounded-[12px] bg-[#f1f1f1] p-1">
+        <h2 className="mb-2 mt-3 text-[17px] font-semibold sm:mb-3 sm:mt-5 sm:text-[22px]">充実度</h2>
+        <div className="grid h-9 min-w-0 grid-cols-4 rounded-[9px] bg-[#f1f1f1] p-0.5 sm:h-[50px] sm:rounded-[12px] sm:p-1">
           {fulfillmentOptions.map(([value, label]) => {
             const active = form.fulfillment_level === value;
             return (
@@ -299,7 +299,7 @@ export function DiaryEditor({
                 type="button"
                 onClick={() => update("fulfillment_level", value)}
                 className={[
-                  "focus-ring rounded-[10px] text-[16px] font-semibold transition sm:text-[21px]",
+                  "focus-ring rounded-[8px] text-[12px] font-semibold transition sm:rounded-[10px] sm:text-[21px]",
                   active ? "bg-[#2f638f] text-white shadow-[0_8px_16px_rgba(47,99,143,0.22)]" : "text-[#5c5c5c]"
                 ].join(" ")}
               >
@@ -310,7 +310,7 @@ export function DiaryEditor({
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[13px] border border-[#ded2c8] bg-white">
+      <section className="overflow-hidden rounded-[10px] border border-[#ded2c8] bg-white sm:rounded-[13px]">
         <DetailRow
           icon={<FileText size={24} />}
           label="気になったニュース"
@@ -356,14 +356,14 @@ function MealField({
   onChange: (value: string) => void;
 }) {
   return (
-    <label className="grid min-h-[78px] min-w-0 grid-cols-[30px_1fr] gap-x-2 rounded-[10px] border border-[#ded2c8] px-3 py-3">
-      <span className="row-span-2 shrink-0 text-[#202124]">{icon}</span>
-      <span className="text-[15px] font-semibold">{label}</span>
+    <label className="grid min-h-[54px] min-w-0 grid-cols-[20px_1fr] gap-x-1.5 rounded-[8px] border border-[#ded2c8] px-2 py-2 sm:min-h-[78px] sm:grid-cols-[30px_1fr] sm:gap-x-2 sm:rounded-[10px] sm:px-3 sm:py-3">
+      <span className="row-span-2 shrink-0 text-[#202124] [&>svg]:size-4 sm:[&>svg]:size-6">{icon}</span>
+      <span className="text-[12px] font-semibold sm:text-[15px]">{label}</span>
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="min-w-0 bg-transparent text-[19px] font-semibold outline-none placeholder:font-medium placeholder:text-[#8b8b8b]"
+        className="min-w-0 bg-transparent text-[13px] font-semibold outline-none placeholder:font-medium placeholder:text-[#8b8b8b] sm:text-[19px]"
       />
     </label>
   );
@@ -385,16 +385,16 @@ function MetricField({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="grid min-h-[96px] min-w-0 grid-cols-[32px_1fr_auto] items-center rounded-[10px] border border-[#ded2c8] px-4 py-3">
-      <span className="row-span-2 text-[#202124]">{icon}</span>
-      <span className="text-[16px] font-semibold">{label}</span>
+    <div className="grid min-h-[66px] min-w-0 grid-cols-[22px_1fr_auto] items-center rounded-[8px] border border-[#ded2c8] px-2.5 py-2 sm:min-h-[96px] sm:grid-cols-[32px_1fr_auto] sm:rounded-[10px] sm:px-4 sm:py-3">
+      <span className="row-span-2 text-[#202124] [&>svg]:size-4 sm:[&>svg]:size-[23px]">{icon}</span>
+      <span className="text-[12px] font-semibold sm:text-[16px]">{label}</span>
       <button
         type="button"
         onClick={(event) => {
           event.preventDefault();
           onChange("");
         }}
-        className="focus-ring row-span-2 ml-2 rounded-full px-2 py-1 text-xs font-semibold text-[#777]"
+        className="focus-ring row-span-2 ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-[#777] sm:ml-2 sm:px-2 sm:py-1 sm:text-xs"
       >
         未入力
       </button>
@@ -407,9 +407,9 @@ function MetricField({
           onChange={(event) => onChange(event.target.value)}
           placeholder="未入力"
           aria-label={label}
-          className="min-w-0 flex-1 bg-transparent text-[21px] font-semibold outline-none"
+          className="min-w-0 flex-1 bg-transparent text-[15px] font-semibold outline-none sm:text-[21px]"
         />
-        {suffix && value ? <span className="text-[21px] font-semibold">{suffix}</span> : null}
+        {suffix && value ? <span className="text-[15px] font-semibold sm:text-[21px]">{suffix}</span> : null}
       </span>
     </div>
   );
@@ -427,14 +427,14 @@ function WeightField({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="grid min-h-[96px] min-w-0 grid-cols-[32px_1fr] rounded-[10px] border border-[#ded2c8] px-4 py-3">
-      <span className="row-span-2 pt-3 text-[#202124]">{icon}</span>
+    <div className="grid min-h-[66px] min-w-0 grid-cols-[22px_1fr] rounded-[8px] border border-[#ded2c8] px-2.5 py-2 sm:min-h-[96px] sm:grid-cols-[32px_1fr] sm:rounded-[10px] sm:px-4 sm:py-3">
+      <span className="row-span-2 pt-2 text-[#202124] [&>svg]:size-4 sm:pt-3 sm:[&>svg]:size-[23px]">{icon}</span>
       <div className="flex min-w-0 items-center justify-between gap-2">
-        <span className="text-[16px] font-semibold">{label}</span>
+        <span className="text-[12px] font-semibold sm:text-[16px]">{label}</span>
         <button
           type="button"
           onClick={() => onChange("")}
-          className="focus-ring shrink-0 rounded-full px-2 py-1 text-xs font-semibold text-[#777]"
+          className="focus-ring shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-[#777] sm:px-2 sm:py-1 sm:text-xs"
         >
           未入力
         </button>
@@ -448,9 +448,9 @@ function WeightField({
           onBlur={(event) => onChange(finalizeWeightInput(event.target.value))}
           placeholder="56.8"
           aria-label={label}
-          className="min-w-0 flex-1 bg-transparent text-[21px] font-semibold outline-none placeholder:text-[#8b8b8b]"
+          className="min-w-0 flex-1 bg-transparent text-[15px] font-semibold outline-none placeholder:text-[#8b8b8b] sm:text-[21px]"
         />
-        <span className="shrink-0 text-[18px] font-semibold text-[#555]">kg</span>
+        <span className="shrink-0 text-[13px] font-semibold text-[#555] sm:text-[18px]">kg</span>
       </div>
     </div>
   );
@@ -468,11 +468,11 @@ function ReadOnlyMetric({
   subLabel: string;
 }) {
   return (
-    <div className="grid min-h-[86px] grid-cols-[32px_1fr] items-center rounded-[10px] border border-[#ded2c8] px-4 py-3">
-      <span className="row-span-3 text-[#202124]">{icon}</span>
-      <span className="text-[16px] font-semibold">{label}</span>
-      <span className="text-[21px] font-semibold">{value}</span>
-      <span className="text-[14px] text-[#8b8b8b]">{subLabel}</span>
+    <div className="grid min-h-[66px] grid-cols-[22px_1fr] items-center rounded-[8px] border border-[#ded2c8] px-2.5 py-2 sm:min-h-[86px] sm:grid-cols-[32px_1fr] sm:rounded-[10px] sm:px-4 sm:py-3">
+      <span className="row-span-3 text-[#202124] [&>svg]:size-4 sm:[&>svg]:size-[23px]">{icon}</span>
+      <span className="text-[12px] font-semibold sm:text-[16px]">{label}</span>
+      <span className="text-[15px] font-semibold sm:text-[21px]">{value}</span>
+      <span className="text-[10px] text-[#8b8b8b] sm:text-[14px]">{subLabel}</span>
     </div>
   );
 }
@@ -492,17 +492,17 @@ function DetailRow({
 }) {
   return (
     <details className="group border-b border-[#ebe3dc] last:border-b-0">
-      <summary className="flex min-h-[72px] cursor-pointer list-none items-center gap-4 px-5 [&::-webkit-details-marker]:hidden">
-        <span className="shrink-0 text-[#202124]">{icon}</span>
-        <span className="min-w-0 flex-1 truncate text-[19px] font-semibold">{label}</span>
-        <span className="shrink-0 text-[18px] text-[#777]">{status}</span>
-        <ChevronRight size={22} className="shrink-0 text-[#777] transition group-open:rotate-90" />
+      <summary className="flex min-h-[48px] cursor-pointer list-none items-center gap-3 px-3 [&::-webkit-details-marker]:hidden sm:min-h-[72px] sm:gap-4 sm:px-5">
+        <span className="shrink-0 text-[#202124] [&>svg]:size-5 sm:[&>svg]:size-6">{icon}</span>
+        <span className="min-w-0 flex-1 truncate text-[15px] font-semibold sm:text-[19px]">{label}</span>
+        <span className="shrink-0 text-[14px] text-[#777] sm:text-[18px]">{status}</span>
+        <ChevronRight size={18} className="shrink-0 text-[#777] transition group-open:rotate-90 sm:size-[22px]" />
       </summary>
-      <div className="px-5 pb-4">
+      <div className="px-3 pb-3 sm:px-5 sm:pb-4">
         <textarea
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="focus-ring min-h-[96px] w-full resize-none rounded-[10px] border border-[#ded2c8] px-3 py-2 text-base outline-none"
+          className="focus-ring min-h-[72px] w-full resize-none rounded-[8px] border border-[#ded2c8] px-2.5 py-2 text-sm outline-none sm:min-h-[96px] sm:rounded-[10px] sm:px-3 sm:text-base"
         />
       </div>
     </details>
@@ -530,16 +530,16 @@ function TodoRow({
 
   return (
     <details className="group border-b border-[#ebe3dc] last:border-b-0">
-      <summary className="flex min-h-[72px] cursor-pointer list-none items-center gap-4 px-5 [&::-webkit-details-marker]:hidden">
-        <span className="shrink-0 text-[#202124]">{icon}</span>
-        <span className="min-w-0 flex-1 truncate text-[19px] font-semibold">{label}</span>
-        <span className="shrink-0 text-[18px] text-[#777]">{status}</span>
-        <ChevronRight size={22} className="shrink-0 text-[#777] transition group-open:rotate-90" />
+      <summary className="flex min-h-[48px] cursor-pointer list-none items-center gap-3 px-3 [&::-webkit-details-marker]:hidden sm:min-h-[72px] sm:gap-4 sm:px-5">
+        <span className="shrink-0 text-[#202124] [&>svg]:size-5 sm:[&>svg]:size-6">{icon}</span>
+        <span className="min-w-0 flex-1 truncate text-[15px] font-semibold sm:text-[19px]">{label}</span>
+        <span className="shrink-0 text-[14px] text-[#777] sm:text-[18px]">{status}</span>
+        <ChevronRight size={18} className="shrink-0 text-[#777] transition group-open:rotate-90 sm:size-[22px]" />
       </summary>
-      <div className="grid gap-2 px-5 pb-4">
+      <div className="grid gap-2 px-3 pb-3 sm:px-5 sm:pb-4">
         {items.map((item, index) => (
           <div key={index} className="grid grid-cols-[18px_1fr_32px] items-center gap-2">
-            <span className="text-xl leading-none text-[#2f638f]">•</span>
+            <span className="text-lg leading-none text-[#2f638f] sm:text-xl">•</span>
             <input
               value={item}
               onChange={(event) => {
@@ -548,7 +548,7 @@ function TodoRow({
                 commit(nextItems);
               }}
               placeholder="やること"
-              className="focus-ring h-11 min-w-0 rounded-[10px] border border-[#ded2c8] px-3 outline-none"
+              className="focus-ring h-9 min-w-0 rounded-[8px] border border-[#ded2c8] px-2.5 text-sm outline-none sm:h-11 sm:rounded-[10px] sm:px-3 sm:text-base"
             />
             <button
               type="button"
@@ -563,7 +563,7 @@ function TodoRow({
         <button
           type="button"
           onClick={() => commit([...items, ""])}
-          className="focus-ring mt-1 flex h-10 items-center justify-center gap-2 rounded-[10px] border border-[#ded2c8] text-sm font-semibold"
+          className="focus-ring mt-1 flex h-9 items-center justify-center gap-2 rounded-[8px] border border-[#ded2c8] text-sm font-semibold sm:h-10 sm:rounded-[10px]"
         >
           <Plus size={17} />
           追加
@@ -584,13 +584,13 @@ function PhotoRow({
 }) {
   return (
     <details className="group">
-      <summary className="flex min-h-[72px] cursor-pointer list-none items-center gap-4 px-5 [&::-webkit-details-marker]:hidden">
-        <ImageIcon size={24} className="shrink-0" />
-        <span className="min-w-0 flex-1 truncate text-[19px] font-semibold">写真</span>
-        <span className="shrink-0 text-[18px] text-[#777]">{value ? "1枚" : "未入力"}</span>
-        <ChevronRight size={22} className="shrink-0 text-[#777] transition group-open:rotate-90" />
+      <summary className="flex min-h-[48px] cursor-pointer list-none items-center gap-3 px-3 [&::-webkit-details-marker]:hidden sm:min-h-[72px] sm:gap-4 sm:px-5">
+        <ImageIcon size={20} className="shrink-0 sm:size-6" />
+        <span className="min-w-0 flex-1 truncate text-[15px] font-semibold sm:text-[19px]">写真</span>
+        <span className="shrink-0 text-[14px] text-[#777] sm:text-[18px]">{value ? "1枚" : "未入力"}</span>
+        <ChevronRight size={18} className="shrink-0 text-[#777] transition group-open:rotate-90 sm:size-[22px]" />
       </summary>
-      <div className="grid gap-3 px-5 pb-4">
+      <div className="grid gap-2 px-3 pb-3 sm:gap-3 sm:px-5 sm:pb-4">
         <input
           type="file"
           accept="image/*"

@@ -121,6 +121,7 @@ export function AppShell({
       <main
         className={clsx(
           "mx-auto max-w-6xl px-4 py-5 md:ml-64 md:px-8 md:py-8",
+          pathname.startsWith("/app/today") && "px-3 py-3 md:px-8 md:py-8",
           calendarActive && "h-[calc(100dvh-5.25rem)] overflow-hidden px-3 py-3 md:h-dvh md:max-w-none md:px-6 md:py-6"
         )}
       >
