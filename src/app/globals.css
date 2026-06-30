@@ -107,6 +107,13 @@ textarea {
   animation: calendar-turn-prev 180ms ease-in forwards;
 }
 
+.calendar-entry-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
 @keyframes calendar-turn-next {
   from {
     opacity: 1;

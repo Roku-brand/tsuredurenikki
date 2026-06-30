@@ -132,7 +132,7 @@ export function CalendarMonthView({
                 key={day.date}
                 href={`/app/today?date=${day.date}`}
                 className={[
-                  "focus-ring relative flex min-h-0 flex-col bg-[#fbfdfb] p-2 transition hover:bg-[#eef7f2]",
+                  "focus-ring relative flex min-h-0 flex-col bg-[#fbfdfb] px-1 py-1.5 transition hover:bg-[#eef7f2] sm:p-2",
                   !day.inMonth ? "text-[#b9c6c7]" : weekdayTone(index),
                   isToday ? "z-10 ring-2 ring-inset ring-[#2f8c7a]" : ""
                 ].join(" ")}
@@ -140,19 +140,19 @@ export function CalendarMonthView({
               >
                 <span
                   className={[
-                    "absolute right-1.5 top-1 text-sm font-medium",
+                    "absolute right-1 top-0.5 text-[11px] font-medium leading-none sm:right-1.5 sm:top-1 sm:text-sm",
                     isToday ? "text-[#002b2f]" : ""
                   ].join(" ")}
                 >
                   {Number(day.date.slice(8))}
                 </span>
                 {entry ? (
-                  <p className="m-auto line-clamp-2 max-w-[92%] text-center text-[13px] font-medium leading-[1.35] text-[#00383c] sm:text-sm">
-                    {entry.title || "無題"}
+                  <p className="calendar-entry-title mx-auto mb-auto mt-[18px] max-w-[4.4em] text-center text-[11px] font-medium leading-[1.18] text-[#00383c] sm:mt-6 sm:max-w-[7.5em] sm:text-sm sm:leading-[1.25]">
+                    {(entry.title || "無題").slice(0, 12)}
                   </p>
                 ) : null}
                 {fulfillment ? (
-                  <span className="absolute bottom-1.5 right-1.5 grid size-4 place-items-center rounded-full bg-[#52cfa5] text-[10px] font-semibold text-[#00383c]">
+                  <span className="absolute bottom-1 right-1 rounded-[4px] bg-[#52cfa5]/80 px-1 text-[9px] font-semibold leading-3 text-[#00383c] sm:bottom-1.5 sm:right-1.5 sm:text-[10px]">
                     {fulfillment}
                   </span>
                 ) : null}
