@@ -37,6 +37,7 @@ export function AppShell({
   const pathname = usePathname();
   const router = useRouter();
   const lockActive = profile.lock_enabled && Boolean(profile.lock_pin_hash);
+  const calendarActive = pathname.startsWith("/app/calendar");
 
   const prefetchPrimaryTabs = useCallback(() => {
     for (const href of primaryNavHrefs) {
@@ -90,7 +91,7 @@ export function AppShell({
   }
 
   return (
-    <div className="min-h-screen pb-20 md:pb-0">
+    <div className={clsx(calendarActive ? "h-dvh overflow-hidden pb-0" : "min-h-screen pb-20 md:pb-0")}>
       <aside className="fixed left-0 top-0 z-20 hidden h-screen w-64 border-r border-[var(--border)] bg-[var(--surface)] px-4 py-5 md:block">
         <Link href="/app/today" className="mb-6 flex items-center gap-3">
           <div className="grid size-11 place-items-center rounded-lg bg-mist text-lg font-semibold text-lake">是</div>
@@ -120,7 +121,7 @@ export function AppShell({
       <main
         className={clsx(
           "mx-auto max-w-6xl px-4 py-5 md:ml-64 md:px-8 md:py-8",
-          pathname.startsWith("/app/calendar") && "h-[calc(100dvh-5.5rem)] overflow-hidden md:h-dvh md:max-w-none"
+          calendarActive && "h-[calc(100dvh-5.25rem)] overflow-hidden px-3 py-3 md:h-dvh md:max-w-none md:px-6 md:py-6"
         )}
       >
         {children}

@@ -17,7 +17,7 @@ import {
   Sun
 } from "lucide-react";
 import { upsertDiaryEntryAction } from "@/server/actions/diary";
-import type { EntryWithTags } from "@/types/database";
+import type { DiaryEntry } from "@/types/database";
 
 type FormState = {
   date: string;
@@ -84,7 +84,7 @@ export function DiaryEditor({
   entry
 }: {
   initialDate: string;
-  entry: EntryWithTags | null;
+  entry: DiaryEntry | null;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();

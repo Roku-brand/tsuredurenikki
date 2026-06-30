@@ -1,32 +1,11 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getMonthBounds, toDateInputValue } from "@/lib/utils/date";
-import type { Database, DiaryEntry, EntryWithTags, Tag } from "@/types/database";
+import type { DiaryEntry, Tag } from "@/types/database";
 import type { SearchFilters } from "@/types/forms";
-
-type Client = SupabaseClient<Database>;
 
 const CALENDAR_ENTRY_COLUMNS = "id,user_id,date,title,fulfillment_level,created_at,updated_at";
 const RECENT_ENTRY_COLUMNS = "id,user_id,date,title,created_at,updated_at";
 const SEARCH_ENTRY_COLUMNS = "id,user_id,date,title,body,news_note,tomorrow_todo,memo,created_at,updated_at";
-
-async function attachTags(supabase: Client, entries: DiaryEntry[]): Promise<EntryWithTags[]> {
-  if (entries.length === 0) return [];
-  const ids = entries.map((entry) => entry.id);
-  const { data } = await supabase
-    .from("diary_entry_tags")
-    .select("diary_entry_id, tags(id,user_id,name,color,created_at,updated_at)")
-    .in("diary_entry_id", ids);
-
-  const byEntry = new Map<string, Tag[]>();
-  for (const row of (data ?? []) as Array<{ diary_entry_id: string; tags: Tag | Tag[] | null }>) {
-    const tag = Array.isArray(row.tags) ? row.tags[0] : row.tags;
-    if (!tag) continue;
-    byEntry.set(row.diary_entry_id, [...(byEntry.get(row.diary_entry_id) ?? []), tag]);
-  }
-
-  return entries.map((entry) => ({ ...entry, tags: byEntry.get(entry.id) ?? [] }));
-}
 
 export async function getEntryByDate(userId: string, date: string) {
   const supabase = await createClient();
@@ -38,8 +17,7 @@ export async function getEntryByDate(userId: string, date: string) {
     .is("deleted_at", null)
     .maybeSingle();
 
-  const entries = await attachTags(supabase, data ? [data as DiaryEntry] : []);
-  return entries[0] ?? null;
+  return (data as DiaryEntry | null) ?? null;
 }
 
 export async function getTodayEntry(userId: string) {

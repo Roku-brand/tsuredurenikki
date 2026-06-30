@@ -19,7 +19,7 @@ export default async function TodayPage({
   const entry = await getEntryByDate(user.id, date);
 
   return (
-    <div className="mx-auto w-full max-w-[430px] md:max-w-[720px]">
+    <div className="mx-auto w-full max-w-[900px]">
       <DiaryEditor initialDate={date} entry={entry} />
     </div>
   );
