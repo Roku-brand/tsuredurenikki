@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -27,6 +27,8 @@ const navItems = [
   { href: "/app/settings", label: "設定", icon: Settings }
 ];
 
+const primaryNavHrefs = navItems.slice(0, 5).map((item) => item.href);
+
 export function AppShell({
   children,
   profile,
@@ -39,6 +41,21 @@ export function AppShell({
   const pathname = usePathname();
   const router = useRouter();
   const lockActive = profile.lock_enabled && Boolean(profile.lock_pin_hash);
+
+  const prefetchPrimaryTabs = useCallback(() => {
+    for (const href of primaryNavHrefs) {
+      if (!pathname.startsWith(href)) router.prefetch(href);
+    }
+  }, [pathname, router]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const run = () => prefetchPrimaryTabs();
+    const idleCallback = window.requestIdleCallback ?? ((callback) => window.setTimeout(callback, 250));
+    const cancelIdleCallback = window.cancelIdleCallback ?? window.clearTimeout;
+    const handle = idleCallback(run);
+    return () => cancelIdleCallback(handle);
+  }, [prefetchPrimaryTabs]);
 
   useEffect(() => {
     if (!lockActive) return;
@@ -62,13 +79,12 @@ export function AppShell({
       );
     };
 
-    ["click", "keydown", "pointermove", "touchstart"].forEach((eventName) => window.addEventListener(eventName, refresh));
+    const activityEvents = ["click", "keydown", "pointerdown", "touchstart", "visibilitychange"];
+    activityEvents.forEach((eventName) => window.addEventListener(eventName, refresh, { passive: true }));
     refresh();
     return () => {
       clearTimeout(timer);
-      ["click", "keydown", "pointermove", "touchstart"].forEach((eventName) =>
-        window.removeEventListener(eventName, refresh)
-      );
+      activityEvents.forEach((eventName) => window.removeEventListener(eventName, refresh));
     };
   }, [lockActive, pathname, router, settings.lock_timeout_minutes]);
 
@@ -89,7 +105,12 @@ export function AppShell({
         </Link>
         <nav className="space-y-1">
           {navItems.map((item) => (
-            <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} />
+            <NavLink
+              key={item.href}
+              item={item}
+              active={pathname.startsWith(item.href)}
+              onIntent={() => router.prefetch(item.href)}
+            />
           ))}
         </nav>
         <div className="absolute bottom-5 left-4 right-4">
@@ -110,11 +131,14 @@ export function AppShell({
             <Link
               key={item.href}
               href={item.href}
+              prefetch
               className={clsx(
                 "focus-ring flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-medium",
                 active ? "bg-mist text-lake" : "text-neutral-500"
               )}
               aria-label={item.label}
+              onFocus={() => router.prefetch(item.href)}
+              onPointerEnter={() => router.prefetch(item.href)}
             >
               <Icon size={19} />
               <span>{item.label}</span>
@@ -128,19 +152,24 @@ export function AppShell({
 
 function NavLink({
   item,
-  active
+  active,
+  onIntent
 }: {
   item: (typeof navItems)[number];
   active: boolean;
+  onIntent: () => void;
 }) {
   const Icon = item.icon;
   return (
     <Link
       href={item.href}
+      prefetch
       className={clsx(
         "focus-ring flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition",
         active ? "bg-mist text-lake" : "text-neutral-600 hover:bg-black/5 dark:text-neutral-300 dark:hover:bg-white/10"
       )}
+      onFocus={onIntent}
+      onPointerEnter={onIntent}
     >
       <Icon size={18} />
       {item.label}
