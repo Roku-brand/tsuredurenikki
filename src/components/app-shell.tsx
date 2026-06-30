@@ -6,28 +6,24 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarDays,
   ChartNoAxesCombined,
-  Download,
   LockKeyhole,
   NotebookPen,
   Search,
-  Settings,
-  Tags
+  Settings
 } from "lucide-react";
 import { clsx } from "clsx";
 import { Button } from "@/components/ui/button";
 import type { AppSettings, Profile } from "@/types/database";
 
 const navItems = [
-  { href: "/app/today", label: "今日", icon: NotebookPen },
   { href: "/app/calendar", label: "カレンダー", icon: CalendarDays },
+  { href: "/app/today", label: "記帳", icon: NotebookPen },
   { href: "/app/search", label: "検索", icon: Search },
   { href: "/app/analysis", label: "分析", icon: ChartNoAxesCombined },
-  { href: "/app/tags", label: "タグ", icon: Tags },
-  { href: "/app/import-export", label: "入出力", icon: Download },
   { href: "/app/settings", label: "設定", icon: Settings }
 ];
 
-const primaryNavHrefs = navItems.slice(0, 5).map((item) => item.href);
+const primaryNavHrefs = navItems.map((item) => item.href);
 
 export function AppShell({
   children,
@@ -121,10 +117,17 @@ export function AppShell({
         </div>
       </aside>
 
-      <main className="mx-auto max-w-6xl px-4 py-5 md:ml-64 md:px-8 md:py-8">{children}</main>
+      <main
+        className={clsx(
+          "mx-auto max-w-6xl px-4 py-5 md:ml-64 md:px-8 md:py-8",
+          pathname.startsWith("/app/calendar") && "h-[calc(100dvh-5.5rem)] overflow-hidden md:h-dvh md:max-w-none"
+        )}
+      >
+        {children}
+      </main>
 
       <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-[var(--border)] bg-[var(--surface)] px-2 pt-2 md:hidden">
-        {navItems.slice(0, 5).map((item) => {
+        {navItems.map((item) => {
           const Icon = item.icon;
           const active = pathname.startsWith(item.href);
           return (

@@ -48,8 +48,8 @@ export function daysInCalendarMonth(month: string) {
     days.push({ date: toDateInputValue(new Date(year, monthIndex - 1, day)), inMonth: true });
   }
 
-  while (days.length % 7 !== 0) {
-    const date = new Date(year, monthIndex - 1, last.getDate() + (days.length % 7));
+  while (days.length < 42) {
+    const date = new Date(year, monthIndex - 1, last.getDate() + (days.length - first.getDay() - last.getDate() + 1));
     days.push({ date: toDateInputValue(date), inMonth: false });
   }
 

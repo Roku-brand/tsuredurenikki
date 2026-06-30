@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Panel, SectionHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Field, Select } from "@/components/ui/field";
-import { StatusPill } from "@/components/ui/status";
 import { getAnalysis, type AnalysisPeriod } from "@/server/queries/analysis";
 import { requireUser } from "@/server/queries/user";
 
@@ -14,7 +13,6 @@ const periods: Array<{ value: AnalysisPeriod; label: string }> = [
   { value: "7d", label: "7日" },
   { value: "30d", label: "30日" },
   { value: "month", label: "今月" },
-  { value: "last-month", label: "先月" },
   { value: "90d", label: "3か月" },
   { value: "year", label: "今年" },
   { value: "all", label: "全期間" }
@@ -32,7 +30,7 @@ export default async function AnalysisPage({
 
   return (
     <div className="grid gap-6">
-      <SectionHeader title="分析" description="日々の記録から、生活・感情・書く量の傾向を見ます。" />
+      <SectionHeader title="分析" description="睡眠、体重、充実度を確認します。" />
 
       <Panel>
         <form action="/app/analysis" className="flex max-w-sm items-end gap-2">
@@ -49,77 +47,57 @@ export default async function AnalysisPage({
         </form>
       </Panel>
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard label="記録日数" value={`${analysis.summary.totalDays}日`} />
-        <SummaryCard label="連続記録" value={`${analysis.summary.streakDays}日`} />
-        <SummaryCard label="平均文字数" value={`${analysis.summary.averageWords}字`} />
-        <SummaryCard label="食事記録率" value={`${analysis.summary.mealRate}%`} />
-        <SummaryCard label="平均気分" value={analysis.summary.averageMood ? `${analysis.summary.averageMood}/5` : "-"} />
-        <SummaryCard label="平均睡眠" value={analysis.summary.averageSleep ? `${analysis.summary.averageSleep}h` : "-"} />
-        <SummaryCard label="よかったこと" value={`${analysis.summary.goodThingCount}件`} />
-        <SummaryCard label="タグ種類" value={`${analysis.tagRanking.length}件`} />
-      </section>
-
       <section className="grid gap-4 lg:grid-cols-2">
         <Panel>
-          <h2 className="mb-4 font-semibold">気分推移</h2>
-          <Trend values={analysis.moodTrend.map((item) => Number(item.value ?? 0))} max={5} />
+          <h2 className="mb-4 font-semibold">睡眠時間グラフ</h2>
+          <Trend values={analysis.sleepTrend.map((item) => Number(item.value ?? 0))} max={12} unit="h" />
         </Panel>
         <Panel>
-          <h2 className="mb-4 font-semibold">睡眠時間</h2>
-          <Trend values={analysis.sleepTrend.map((item) => Number(item.value ?? 0))} max={12} />
-        </Panel>
-        <Panel>
-          <h2 className="mb-4 font-semibold">文字数</h2>
+          <h2 className="mb-4 font-semibold">体重グラフ</h2>
           <Trend
-            values={analysis.wordsTrend.map((item) => Number(item.value ?? 0))}
-            max={Math.max(120, ...analysis.wordsTrend.map((item) => Number(item.value ?? 0)))}
+            values={analysis.weightTrend.map((item) => Number(item.value ?? 0))}
+            max={Math.max(1, ...analysis.weightTrend.map((item) => Number(item.value ?? 0)))}
+            unit="kg"
           />
         </Panel>
-        <Panel>
-          <h2 className="mb-4 font-semibold">タグランキング</h2>
-          {analysis.tagRanking.length ? (
-            <div className="grid gap-3">
-              {analysis.tagRanking.map((item) => (
-                <div key={item.tag.id}>
-                  <div className="mb-1 flex items-center justify-between text-sm">
-                    <StatusPill>{item.tag.name}</StatusPill>
-                    <span className="text-neutral-500">{item.count}件</span>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-neutral-100 dark:bg-white/10">
-                    <div className="h-full rounded-full bg-moss" style={{ width: `${Math.min(100, item.count * 18)}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-neutral-500">タグ付きの日記はまだありません。</p>
-          )}
-        </Panel>
       </section>
+
+      <Panel>
+        <h2 className="mb-4 font-semibold">充実度集計表</h2>
+        <div className="overflow-hidden rounded-lg border border-[var(--border)]">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-[var(--surface-muted)]">
+              <tr>
+                <th className="px-4 py-3 font-semibold">充実度</th>
+                <th className="px-4 py-3 font-semibold">日数</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(["A", "B", "C"] as const).map((label) => (
+                <tr key={label} className="border-t border-[var(--border)]">
+                  <td className="px-4 py-3 font-semibold">{label}</td>
+                  <td className="px-4 py-3">{analysis.fulfillmentCounts[label]}日</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Panel>
     </div>
   );
 }
 
-function SummaryCard({ label, value }: { label: string; value: string }) {
+function Trend({ values, max, unit }: { values: number[]; max: number; unit: string }) {
+  const available = values.filter((value) => value > 0);
+  if (!available.length) return <p className="text-sm text-neutral-500">まだデータがありません。</p>;
   return (
-    <Panel>
-      <p className="text-sm text-neutral-500">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </Panel>
-  );
-}
-
-function Trend({ values, max }: { values: number[]; max: number }) {
-  if (!values.length) return <p className="text-sm text-neutral-500">まだデータがありません。</p>;
-  return (
-    <div className="flex h-32 items-end gap-1">
+    <div className="flex h-40 items-end gap-1">
       {values.slice(-40).map((value, index) => (
         <div
           key={`${value}-${index}`}
           className="min-w-1 flex-1 rounded-t bg-lake/80"
-          style={{ height: `${Math.max(4, Math.min(100, (value / Math.max(1, max)) * 100))}%` }}
-          title={String(value)}
+          style={{ height: value > 0 ? `${Math.max(4, Math.min(100, (value / Math.max(1, max)) * 100))}%` : "4px" }}
+          title={value > 0 ? `${value}${unit}` : "-"}
         />
       ))}
     </div>

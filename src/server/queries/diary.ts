@@ -6,8 +6,9 @@ import type { SearchFilters } from "@/types/forms";
 
 type Client = SupabaseClient<Database>;
 
-const CALENDAR_ENTRY_COLUMNS = "id,user_id,date,title,mood,created_at,updated_at";
+const CALENDAR_ENTRY_COLUMNS = "id,user_id,date,title,fulfillment_level,created_at,updated_at";
 const RECENT_ENTRY_COLUMNS = "id,user_id,date,title,created_at,updated_at";
+const SEARCH_ENTRY_COLUMNS = "id,user_id,date,title,body,news_note,tomorrow_todo,memo,created_at,updated_at";
 
 async function attachTags(supabase: Client, entries: DiaryEntry[]): Promise<EntryWithTags[]> {
   if (entries.length === 0) return [];
@@ -113,7 +114,7 @@ export async function searchDiaryEntries(userId: string, filters: SearchFilters)
 
   let query = supabase
     .from("diary_entries")
-    .select("*")
+    .select(SEARCH_ENTRY_COLUMNS)
     .eq("user_id", userId)
     .is("deleted_at", null)
     .order("date", { ascending: false })
@@ -133,10 +134,9 @@ export async function searchDiaryEntries(userId: string, filters: SearchFilters)
       [
         `title.ilike.%${escaped}%`,
         `body.ilike.%${escaped}%`,
-        `meal_note.ilike.%${escaped}%`,
         `memo.ilike.%${escaped}%`,
-        `good_things.ilike.%${escaped}%`,
-        `reflections.ilike.%${escaped}%`
+        `news_note.ilike.%${escaped}%`,
+        `tomorrow_todo.ilike.%${escaped}%`
       ].join(",")
     );
   }
@@ -148,5 +148,5 @@ export async function searchDiaryEntries(userId: string, filters: SearchFilters)
   if (allowedEntryIds) query = query.in("id", allowedEntryIds);
 
   const { data } = await query;
-  return attachTags(supabase, (data ?? []) as DiaryEntry[]);
+  return (data ?? []) as DiaryEntry[];
 }

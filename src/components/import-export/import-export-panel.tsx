@@ -14,10 +14,9 @@ export function ImportExportPanel() {
 
   const preview = useMemo(() => {
     if (!payload || typeof payload !== "object") return null;
-    const object = payload as { diary_entries?: unknown[]; tags?: unknown[] };
+    const object = payload as { diary_entries?: unknown[] };
     return {
-      entries: Array.isArray(object.diary_entries) ? object.diary_entries.length : 0,
-      tags: Array.isArray(object.tags) ? object.tags.length : 0
+      entries: Array.isArray(object.diary_entries) ? object.diary_entries.length : 0
     };
   }, [payload]);
 
@@ -66,7 +65,7 @@ export function ImportExportPanel() {
       <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-soft">
         <h2 className="mb-3 font-semibold">JSONエクスポート</h2>
         <p className="mb-4 text-sm leading-6 text-neutral-600 dark:text-neutral-300">
-          日記、タグ、保存検索、設定をJSONとして出力します。
+          日記データと設定をJSONとして出力します。
         </p>
         <Button type="button" onClick={exportJson} disabled={isPending}>
           <Download size={16} />
@@ -92,7 +91,7 @@ export function ImportExportPanel() {
           </Select>
           {preview ? (
             <p className="rounded-lg bg-mist px-3 py-2 text-sm text-neutral-700">
-              日記 {preview.entries}件 / タグ {preview.tags}件
+              日記 {preview.entries}件
             </p>
           ) : null}
           <Button type="button" onClick={importJson} disabled={isPending || !payload}>
