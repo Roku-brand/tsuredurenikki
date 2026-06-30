@@ -2,11 +2,21 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ImagePlus, Save, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Field, Input, Select, Textarea } from "@/components/ui/field";
-import { StatusPill } from "@/components/ui/status";
-import { deleteDiaryEntryAction, upsertDiaryEntryAction } from "@/server/actions/diary";
+import {
+  Bed,
+  CalendarCheck,
+  CheckCircle2,
+  ChevronRight,
+  Clock3,
+  FileText,
+  Image as ImageIcon,
+  Moon,
+  Pencil,
+  Save,
+  Scale,
+  Sun
+} from "lucide-react";
+import { upsertDiaryEntryAction } from "@/server/actions/diary";
 import type { EntryWithTags } from "@/types/database";
 
 type FormState = {
@@ -27,7 +37,6 @@ type FormState = {
 };
 
 const fulfillmentOptions = [
-  ["", "未選択"],
   ["5", "A"],
   ["3", "B"],
   ["1", "C"]
@@ -47,6 +56,27 @@ function calculateSleepHours(wakeTime: string, bedtime: string) {
   const bedTotal = bedHour * 60 + bedMinute;
   const minutes = wakeTotal > bedTotal ? wakeTotal - bedTotal : wakeTotal + 24 * 60 - bedTotal;
   return String(Math.round((minutes / 60) * 10) / 10);
+}
+
+function sleepText(hours: string) {
+  if (!hours) return "未入力";
+  const totalMinutes = Math.round(Number(hours) * 60);
+  const hour = Math.floor(totalMinutes / 60);
+  const minute = totalMinutes % 60;
+  return minute ? `${hour}h${String(minute).padStart(2, "0")}m` : `${hour}h`;
+}
+
+function dateLabel(value: string) {
+  const date = new Date(`${value}T00:00:00`);
+  const weekday = new Intl.DateTimeFormat("ja-JP", { weekday: "short" }).format(date);
+  return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}（${weekday}）`;
+}
+
+function lineCount(value: string) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean).length;
 }
 
 export function DiaryEditor({
@@ -71,7 +101,7 @@ export function DiaryEditor({
     wake_time: entry?.wake_time?.slice(0, 5) ?? "",
     bedtime: timeValue(entry?.weather),
     body_weight: entry?.body_weight?.toString() ?? "",
-    fulfillment_level: entry?.fulfillment_level?.toString() ?? "",
+    fulfillment_level: entry?.fulfillment_level?.toString() ?? "3",
     news_note: entry?.news_note ?? "",
     tomorrow_todo: entry?.tomorrow_todo ?? "",
     memo: entry?.memo ?? "",
@@ -125,17 +155,6 @@ export function DiaryEditor({
     router.refresh();
   }
 
-  function deleteEntry() {
-    if (!entry?.id) return;
-    const ok = window.confirm("この日の記録を削除しますか？");
-    if (!ok) return;
-    startTransition(async () => {
-      const result = await deleteDiaryEntryAction(entry.id);
-      setMessage(result.message ?? "");
-      if (result.ok) router.refresh();
-    });
-  }
-
   function loadPhoto(file: File | undefined) {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
@@ -160,127 +179,270 @@ export function DiaryEditor({
     return () => clearTimeout(timer);
   }, [form, status]);
 
-  const statusTone = status === "saved" ? "good" : status === "saving" ? "warn" : status === "error" ? "bad" : "neutral";
-  const statusText =
-    status === "saved" ? "保存済み" : status === "saving" ? "保存中..." : status === "error" ? "保存失敗" : "編集中";
   const sleepHours = calculateSleepHours(form.wake_time, form.bedtime);
+  const saveText = status === "saving" ? "保存中" : "保存";
 
   return (
-    <form action={() => startTransition(() => void save())} className="grid gap-4">
-      <div className="flex flex-col gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-soft sm:flex-row sm:items-end sm:justify-between">
-        <div className="grid flex-1 gap-3 sm:grid-cols-[180px_1fr]">
-          <Field label="日付">
-            <Input type="date" value={form.date} onChange={(event) => update("date", event.target.value)} />
-          </Field>
-          <Field label="タイトル">
-            <Input value={form.title} onChange={(event) => update("title", event.target.value)} placeholder="今日の題名" />
-          </Field>
+    <form action={() => startTransition(() => void save())} className="grid gap-4 text-[#202124]">
+      <header className="flex items-center justify-between gap-4">
+        <div className="flex items-baseline gap-4">
+          <h1 className="text-[34px] font-semibold tracking-normal">記帳</h1>
+          <time className="text-[19px] font-medium text-[#30343b]">{dateLabel(form.date)}</time>
         </div>
-        <div className="flex items-center gap-2">
-          <StatusPill tone={statusTone}>{statusText}</StatusPill>
-          {entry?.id ? (
-            <Button type="button" variant="ghost" size="sm" onClick={deleteEntry} disabled={isPending} aria-label="削除">
-              <Trash2 size={16} />
-            </Button>
-          ) : null}
-          <Button type="submit" disabled={isPending}>
-            <Save size={16} />
-            保存
-          </Button>
+        <button
+          type="submit"
+          disabled={isPending}
+          className="focus-ring flex h-14 shrink-0 items-center gap-2 rounded-[12px] bg-[#2f638f] px-5 text-[19px] font-semibold text-white shadow-[0_10px_24px_rgba(47,99,143,0.24)]"
+        >
+          <Save size={22} />
+          {saveText}
+        </button>
+      </header>
+
+      <input
+        type="text"
+        value={form.title}
+        onChange={(event) => update("title", event.target.value)}
+        placeholder="今日の題名"
+        className="focus-ring h-[62px] rounded-[13px] border border-[#ded2c8] bg-white px-4 text-[22px] outline-none placeholder:text-[#8b8b8b]"
+      />
+
+      <section className="rounded-[13px] border border-[#ded2c8] bg-white p-4">
+        <h2 className="mb-4 text-[22px] font-semibold">本文</h2>
+        <textarea
+          value={form.body}
+          onChange={(event) => update("body", event.target.value)}
+          placeholder="今日の出来事や感じたこと"
+          className="focus-ring min-h-[128px] w-full resize-none rounded-[11px] border border-[#ded2c8] bg-white px-4 py-4 text-[19px] leading-8 outline-none placeholder:text-[#8b8b8b]"
+        />
+      </section>
+
+      <section className="rounded-[13px] border border-[#ded2c8] bg-white p-4">
+        <h2 className="mb-4 text-[22px] font-semibold">ごはん</h2>
+        <div className="grid grid-cols-3 gap-3">
+          <MealField icon={<Sun size={24} />} label="朝" value={form.breakfast} placeholder="未入力" onChange={(value) => update("breakfast", value)} />
+          <MealField icon={<Sun size={24} />} label="昼" value={form.lunch} placeholder="未入力" onChange={(value) => update("lunch", value)} />
+          <MealField icon={<Moon size={24} />} label="夜" value={form.dinner} placeholder="未入力" onChange={(value) => update("dinner", value)} />
         </div>
-      </div>
+      </section>
 
-      {message ? <p className="rounded-lg bg-mist px-3 py-2 text-sm text-neutral-700 dark:text-neutral-200">{message}</p> : null}
-
-      <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-soft">
-        <Field label="本文">
-          <Textarea
-            value={form.body}
-            onChange={(event) => update("body", event.target.value)}
-            className="min-h-56 text-base leading-8"
-            placeholder="今日の出来事や感じたこと"
+      <section className="rounded-[13px] border border-[#ded2c8] bg-white p-4">
+        <h2 className="mb-4 text-[22px] font-semibold">からだ</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <MetricField icon={<Clock3 size={23} />} label="起床" value={form.wake_time} type="time" onChange={(value) => update("wake_time", value)} />
+          <MetricField icon={<Bed size={23} />} label="就寝" value={form.bedtime} type="time" onChange={(value) => update("bedtime", value)} />
+          <ReadOnlyMetric icon={<Moon size={23} />} label="睡眠" value={sleepText(sleepHours)} subLabel="自動計算" />
+          <MetricField
+            icon={<Scale size={23} />}
+            label="体重"
+            value={form.body_weight}
+            type="number"
+            suffix="kg"
+            onChange={(value) => update("body_weight", value)}
           />
-        </Field>
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-soft">
-          <h2 className="mb-3 font-semibold">ごはん</h2>
-          <div className="grid gap-3">
-            <Field label="朝">
-              <Input value={form.breakfast} onChange={(event) => update("breakfast", event.target.value)} />
-            </Field>
-            <Field label="昼">
-              <Input value={form.lunch} onChange={(event) => update("lunch", event.target.value)} />
-            </Field>
-            <Field label="夜">
-              <Input value={form.dinner} onChange={(event) => update("dinner", event.target.value)} />
-            </Field>
-          </div>
         </div>
 
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-soft">
-          <h2 className="mb-3 font-semibold">からだ</h2>
-          <div className="grid gap-3">
-            <Field label="起床時間">
-              <Input type="time" value={form.wake_time} onChange={(event) => update("wake_time", event.target.value)} />
-            </Field>
-            <Field label="就寝時間">
-              <Input type="time" value={form.bedtime} onChange={(event) => update("bedtime", event.target.value)} />
-            </Field>
-            <Field label="体重">
-              <Input type="number" step="0.1" min="0" value={form.body_weight} onChange={(event) => update("body_weight", event.target.value)} />
-            </Field>
-            <p className="rounded-lg bg-[var(--surface-muted)] px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300">
-              睡眠時間 {sleepHours ? `${sleepHours}時間` : "-"}
-            </p>
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-soft">
-          <h2 className="mb-3 font-semibold">充実度</h2>
-          <Field label="ABC">
-            <Select value={form.fulfillment_level} onChange={(event) => update("fulfillment_level", event.target.value)}>
-              {fulfillmentOptions.map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </Select>
-          </Field>
+        <h2 className="mb-3 mt-5 text-[22px] font-semibold">充実度</h2>
+        <div className="grid h-[50px] grid-cols-3 rounded-[12px] bg-[#f1f1f1] p-1">
+          {fulfillmentOptions.map(([value, label]) => {
+            const active = form.fulfillment_level === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => update("fulfillment_level", value)}
+                className={[
+                  "focus-ring rounded-[10px] text-[21px] font-semibold transition",
+                  active ? "bg-[#2f638f] text-white shadow-[0_8px_16px_rgba(47,99,143,0.22)]" : "text-[#5c5c5c]"
+                ].join(" ")}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <MemoArea label="気になったニュース" value={form.news_note} onChange={(value) => update("news_note", value)} />
-        <MemoArea label="明日のTO DO" value={form.tomorrow_todo} onChange={(value) => update("tomorrow_todo", value)} />
-        <MemoArea label="メモ" value={form.memo} onChange={(value) => update("memo", value)} />
-        <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-soft">
-          <div className="mb-2 flex items-center gap-2 font-semibold">
-            <ImagePlus size={18} />
-            写真添付
-          </div>
-          <Field label="画像">
-            <Input type="file" accept="image/*" onChange={(event) => loadPhoto(event.target.files?.[0])} />
-          </Field>
-          {form.photo_note.startsWith("data:image/") ? (
-            <img src={form.photo_note} alt="" className="mt-3 max-h-56 w-full rounded-lg object-cover" />
-          ) : null}
-          <Button type="button" variant="secondary" className="mt-3" onClick={() => update("photo_note", "")} disabled={!form.photo_note}>
-            写真を削除
-          </Button>
-        </section>
+      <section className="overflow-hidden rounded-[13px] border border-[#ded2c8] bg-white">
+        <DetailRow
+          icon={<FileText size={24} />}
+          label="気になったニュース"
+          status={form.news_note ? "あり" : "未入力"}
+          value={form.news_note}
+          onChange={(value) => update("news_note", value)}
+        />
+        <DetailRow
+          icon={<CheckCircle2 size={24} />}
+          label="明日のTO DO"
+          status={form.tomorrow_todo ? `${lineCount(form.tomorrow_todo)}件` : "未入力"}
+          value={form.tomorrow_todo}
+          onChange={(value) => update("tomorrow_todo", value)}
+        />
+        <DetailRow
+          icon={<Pencil size={24} />}
+          label="メモ"
+          status={form.memo ? "あり" : "未入力"}
+          value={form.memo}
+          onChange={(value) => update("memo", value)}
+        />
+        <PhotoRow value={form.photo_note} onChange={(value) => update("photo_note", value)} onFile={loadPhoto} />
       </section>
+
+      {message ? (
+        <p className="rounded-[12px] bg-[#eef4f2] px-4 py-3 text-sm text-neutral-700">{message}</p>
+      ) : null}
     </form>
   );
 }
 
-function MemoArea({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+function MealField({
+  icon,
+  label,
+  value,
+  placeholder,
+  onChange
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+}) {
   return (
-    <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-soft">
-      <Field label={label}>
-        <Textarea value={value} onChange={(event) => onChange(event.target.value)} className="min-h-24" />
-      </Field>
-    </section>
+    <label className="flex h-[68px] items-center gap-2 rounded-[10px] border border-[#ded2c8] px-3">
+      <span className="shrink-0 text-[#202124]">{icon}</span>
+      <span className="shrink-0 text-[18px] font-semibold">{label}:</span>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="min-w-0 flex-1 bg-transparent text-[18px] font-semibold outline-none placeholder:font-medium placeholder:text-[#8b8b8b]"
+      />
+    </label>
+  );
+}
+
+function MetricField({
+  icon,
+  label,
+  value,
+  type,
+  suffix,
+  onChange
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  type: "time" | "number";
+  suffix?: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="grid min-h-[86px] grid-cols-[32px_1fr] items-center rounded-[10px] border border-[#ded2c8] px-4 py-3">
+      <span className="row-span-2 text-[#202124]">{icon}</span>
+      <span className="text-[16px] font-semibold">{label}</span>
+      <span className="flex items-baseline gap-1">
+        <input
+          type={type}
+          step={type === "number" ? "0.1" : undefined}
+          min={type === "number" ? "0" : undefined}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="min-w-0 flex-1 bg-transparent text-[21px] font-semibold outline-none"
+        />
+        {suffix && value ? <span className="text-[21px] font-semibold">{suffix}</span> : null}
+      </span>
+    </label>
+  );
+}
+
+function ReadOnlyMetric({
+  icon,
+  label,
+  value,
+  subLabel
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  subLabel: string;
+}) {
+  return (
+    <div className="grid min-h-[86px] grid-cols-[32px_1fr] items-center rounded-[10px] border border-[#ded2c8] px-4 py-3">
+      <span className="row-span-3 text-[#202124]">{icon}</span>
+      <span className="text-[16px] font-semibold">{label}</span>
+      <span className="text-[21px] font-semibold">{value}</span>
+      <span className="text-[14px] text-[#8b8b8b]">{subLabel}</span>
+    </div>
+  );
+}
+
+function DetailRow({
+  icon,
+  label,
+  status,
+  value,
+  onChange
+}: {
+  icon: React.ReactNode;
+  label: string;
+  status: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <details className="group border-b border-[#ebe3dc] last:border-b-0">
+      <summary className="flex min-h-[72px] cursor-pointer list-none items-center gap-4 px-5 [&::-webkit-details-marker]:hidden">
+        <span className="text-[#202124]">{icon}</span>
+        <span className="flex-1 text-[19px] font-semibold">{label}</span>
+        <span className="text-[18px] text-[#777]">{status}</span>
+        <ChevronRight size={22} className="text-[#777] transition group-open:rotate-90" />
+      </summary>
+      <div className="px-5 pb-4">
+        <textarea
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="focus-ring min-h-[96px] w-full resize-none rounded-[10px] border border-[#ded2c8] px-3 py-2 text-base outline-none"
+        />
+      </div>
+    </details>
+  );
+}
+
+function PhotoRow({
+  value,
+  onChange,
+  onFile
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onFile: (file: File | undefined) => void;
+}) {
+  return (
+    <details className="group">
+      <summary className="flex min-h-[72px] cursor-pointer list-none items-center gap-4 px-5 [&::-webkit-details-marker]:hidden">
+        <ImageIcon size={24} />
+        <span className="flex-1 text-[19px] font-semibold">写真</span>
+        <span className="text-[18px] text-[#777]">{value ? "1枚" : "未入力"}</span>
+        <ChevronRight size={22} className="text-[#777] transition group-open:rotate-90" />
+      </summary>
+      <div className="grid gap-3 px-5 pb-4">
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(event) => onFile(event.target.files?.[0])}
+          className="focus-ring w-full rounded-[10px] border border-[#ded2c8] px-3 py-2 text-sm"
+        />
+        {value.startsWith("data:image/") ? <img src={value} alt="" className="max-h-56 w-full rounded-[10px] object-cover" /> : null}
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          disabled={!value}
+          className="focus-ring h-10 rounded-[10px] border border-[#ded2c8] text-sm font-semibold disabled:opacity-45"
+        >
+          写真を削除
+        </button>
+      </div>
+    </details>
   );
 }
