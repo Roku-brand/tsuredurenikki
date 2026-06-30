@@ -1,7 +1,23 @@
 import { createClient } from "@/lib/supabase/server";
-import type { DiaryEntry, Tag } from "@/types/database";
+import type { Tag } from "@/types/database";
 
 export type AnalysisPeriod = "7d" | "30d" | "month" | "last-month" | "90d" | "year" | "all";
+
+type AnalysisEntry = {
+  id: string;
+  date: string;
+  word_count: number | null;
+  breakfast: string | null;
+  lunch: string | null;
+  dinner: string | null;
+  meal_note: string | null;
+  mood: number | null;
+  sleep_hours: number | null;
+  good_things: string | null;
+};
+
+const ANALYSIS_ENTRY_COLUMNS =
+  "id,date,word_count,breakfast,lunch,dinner,meal_note,mood,sleep_hours,good_things";
 
 function getStartDate(period: AnalysisPeriod) {
   const today = new Date();
@@ -28,7 +44,7 @@ export async function getAnalysis(userId: string, period: AnalysisPeriod) {
 
   let query = supabase
     .from("diary_entries")
-    .select("*")
+    .select(ANALYSIS_ENTRY_COLUMNS)
     .eq("user_id", userId)
     .is("deleted_at", null)
     .order("date", { ascending: true });
@@ -37,7 +53,7 @@ export async function getAnalysis(userId: string, period: AnalysisPeriod) {
   if (lastMonthEnd) query = query.lte("date", isoDate(lastMonthEnd));
 
   const { data: entriesData } = await query;
-  const entries = (entriesData ?? []) as DiaryEntry[];
+  const entries = (entriesData ?? []) as AnalysisEntry[];
   const entryIds = entries.map((entry) => entry.id);
 
   const { data: tagRows } = entryIds.length

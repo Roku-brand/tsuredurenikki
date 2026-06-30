@@ -71,7 +71,10 @@ export default async function AnalysisPage({
         </Panel>
         <Panel>
           <h2 className="mb-4 font-semibold">文字数</h2>
-          <Trend values={analysis.wordsTrend.map((item) => Number(item.value ?? 0))} max={Math.max(120, ...analysis.wordsTrend.map((item) => item.value))} />
+          <Trend
+            values={analysis.wordsTrend.map((item) => Number(item.value ?? 0))}
+            max={Math.max(120, ...analysis.wordsTrend.map((item) => Number(item.value ?? 0)))}
+          />
         </Panel>
         <Panel>
           <h2 className="mb-4 font-semibold">タグランキング</h2>

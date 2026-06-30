@@ -1,9 +1,10 @@
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { assertSupabaseEnv } from "@/lib/env";
 import type { Database } from "@/types/database";
 
-export async function createClient() {
+export const createClient = cache(async function createClient() {
   const cookieStore = await cookies();
   const env = assertSupabaseEnv();
 
@@ -23,4 +24,4 @@ export async function createClient() {
       }
     }
   });
-}
+});

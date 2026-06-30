@@ -6,7 +6,6 @@ import Link from "next/link";
 import { Mail, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
-import { createClient } from "@/lib/supabase/client";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
@@ -20,6 +19,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       setMessage("");
       const email = String(formData.get("email") ?? "");
       const password = String(formData.get("password") ?? "");
+      const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
       const result =
         mode === "login"
@@ -48,6 +48,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         setMessage("メールアドレスを入力してください。");
         return;
       }
+      const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
       await supabase.auth.resetPasswordForEmail(email);
       setMessage("パスワードリセット用のメールを送信しました。");

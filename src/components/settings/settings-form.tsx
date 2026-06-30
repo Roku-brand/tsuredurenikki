@@ -6,7 +6,6 @@ import { LogOut, Save, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/field";
 import { setLockPinAction, updateLockSettingsAction } from "@/server/actions/lock";
-import { createClient } from "@/lib/supabase/client";
 import type { AppSettings, Profile } from "@/types/database";
 
 export function SettingsForm({ profile, settings }: { profile: Profile; settings: AppSettings }) {
@@ -42,6 +41,7 @@ export function SettingsForm({ profile, settings }: { profile: Profile; settings
   function signOut() {
     startTransition(async () => {
       sessionStorage.removeItem("zezehibi:unlocked");
+      const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
       await supabase.auth.signOut();
       router.replace("/login");

@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { AppSettings, Profile } from "@/types/database";
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async function getCurrentUser() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -11,7 +12,7 @@ export async function getCurrentUser() {
 
   if (error || !user) return null;
   return user;
-}
+});
 
 export async function requireUser() {
   const user = await getCurrentUser();
@@ -19,7 +20,7 @@ export async function requireUser() {
   return user;
 }
 
-export async function ensureProfile() {
+export const ensureProfile = cache(async function ensureProfile() {
   const user = await requireUser();
   const supabase = await createClient();
 
@@ -54,4 +55,4 @@ export async function ensureProfile() {
     profile: profile as Profile,
     settings: settings as AppSettings
   };
-}
+});

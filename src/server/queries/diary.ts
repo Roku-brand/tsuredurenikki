@@ -6,6 +6,9 @@ import type { SearchFilters } from "@/types/forms";
 
 type Client = SupabaseClient<Database>;
 
+const CALENDAR_ENTRY_COLUMNS = "id,user_id,date,title,mood,created_at,updated_at";
+const RECENT_ENTRY_COLUMNS = "id,user_id,date,title,created_at,updated_at";
+
 async function attachTags(supabase: Client, entries: DiaryEntry[]): Promise<EntryWithTags[]> {
   if (entries.length === 0) return [];
   const ids = entries.map((entry) => entry.id);
@@ -47,27 +50,27 @@ export async function getEntriesForMonth(userId: string, month: string) {
   const { start, end } = getMonthBounds(month);
   const { data } = await supabase
     .from("diary_entries")
-    .select("*")
+    .select(CALENDAR_ENTRY_COLUMNS)
     .eq("user_id", userId)
     .gte("date", start)
     .lte("date", end)
     .is("deleted_at", null)
     .order("date", { ascending: true });
 
-  return attachTags(supabase, (data ?? []) as DiaryEntry[]);
+  return (data ?? []) as DiaryEntry[];
 }
 
 export async function getRecentEntries(userId: string, limit = 12) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("diary_entries")
-    .select("*")
+    .select(RECENT_ENTRY_COLUMNS)
     .eq("user_id", userId)
     .is("deleted_at", null)
     .order("date", { ascending: false })
     .limit(limit);
 
-  return attachTags(supabase, (data ?? []) as DiaryEntry[]);
+  return (data ?? []) as DiaryEntry[];
 }
 
 export async function getAllTags(userId: string) {
@@ -89,13 +92,32 @@ export async function getSavedSearches(userId: string) {
 
 export async function searchDiaryEntries(userId: string, filters: SearchFilters) {
   const supabase = await createClient();
+  let allowedEntryIds: string[] | null = null;
+
+  if (filters.tags?.length) {
+    const { data: tagRows } = await supabase
+      .from("tags")
+      .select("id")
+      .eq("user_id", userId)
+      .in("name", filters.tags);
+    const tagIds = (tagRows ?? []).map((tag) => tag.id);
+    if (!tagIds.length) return [];
+
+    const { data: links } = await supabase
+      .from("diary_entry_tags")
+      .select("diary_entry_id")
+      .in("tag_id", tagIds);
+    allowedEntryIds = [...new Set((links ?? []).map((link) => link.diary_entry_id))];
+    if (!allowedEntryIds.length) return [];
+  }
+
   let query = supabase
     .from("diary_entries")
     .select("*")
     .eq("user_id", userId)
     .is("deleted_at", null)
     .order("date", { ascending: false })
-    .limit(200);
+    .limit(50);
 
   if (filters.from) query = query.gte("date", filters.from);
   if (filters.to) query = query.lte("date", filters.to);
@@ -123,13 +145,8 @@ export async function searchDiaryEntries(userId: string, filters: SearchFilters)
     query = query.or("breakfast.not.is.null,lunch.not.is.null,dinner.not.is.null,meal_note.not.is.null");
   }
 
+  if (allowedEntryIds) query = query.in("id", allowedEntryIds);
+
   const { data } = await query;
-  let entries = await attachTags(supabase, (data ?? []) as DiaryEntry[]);
-
-  if (filters.tags?.length) {
-    const selected = new Set(filters.tags.map((tag) => tag.toLowerCase()));
-    entries = entries.filter((entry) => entry.tags.some((tag) => selected.has(tag.name.toLowerCase())));
-  }
-
-  return entries;
+  return attachTags(supabase, (data ?? []) as DiaryEntry[]);
 }
