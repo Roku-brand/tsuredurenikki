@@ -93,7 +93,7 @@ export function AppShell({
   return (
     <div className={clsx(calendarActive ? "h-dvh overflow-hidden pb-0" : "min-h-screen pb-20 md:pb-0")}>
       <aside className="fixed left-0 top-0 z-20 hidden h-screen w-64 border-r border-[var(--border)] bg-[var(--surface)] px-4 py-5 md:block">
-        <Link href="/app/today" className="mb-6 flex items-center gap-3">
+        <Link href="/app/home" className="mb-6 flex items-center gap-3">
           <div className="grid size-11 place-items-center rounded-lg bg-mist text-lg font-semibold text-lake">是</div>
           <div>
             <p className="font-semibold">是々日々</p>

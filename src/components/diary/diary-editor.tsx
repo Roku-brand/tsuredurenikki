@@ -39,7 +39,6 @@ type FormState = {
 };
 
 const fulfillmentOptions = [
-  ["", "未入力"],
   ["5", "A"],
   ["3", "B"],
   ["1", "C"]
@@ -219,6 +218,7 @@ export function DiaryEditor({
 
   const sleepHours = calculateSleepHours(form.wake_time, form.bedtime);
   const saveText = status === "saving" ? "保存中" : "保存";
+  const updateFulfillment = (value: string) => update("fulfillment_level", form.fulfillment_level === value ? "" : value);
 
   return (
     <form action={() => startTransition(() => void save())} className="grid w-full min-w-0 gap-2.5 overflow-x-hidden text-[#202124] sm:gap-4">
@@ -227,7 +227,26 @@ export function DiaryEditor({
           <h1 className="text-[26px] font-semibold tracking-normal sm:text-[34px]">記帳</h1>
           <time className="truncate text-[14px] font-medium text-[#30343b] sm:text-[19px]">{dateLabel(form.date)}</time>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="grid h-10 grid-cols-3 rounded-[10px] bg-[#f1f1f1] p-0.5 sm:h-14 sm:rounded-[12px] sm:p-1">
+            {fulfillmentOptions.map(([value, label]) => {
+              const active = form.fulfillment_level === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => updateFulfillment(value)}
+                  aria-pressed={active}
+                  className={[
+                    "focus-ring w-7 rounded-[8px] text-[13px] font-semibold transition sm:w-10 sm:rounded-[10px] sm:text-[18px]",
+                    active ? "bg-[#2f638f] text-white shadow-[0_6px_12px_rgba(47,99,143,0.18)]" : "text-[#5c5c5c]"
+                  ].join(" ")}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
           <button
             type="button"
             onClick={deleteEntry}
@@ -268,7 +287,7 @@ export function DiaryEditor({
 
       <section className="rounded-[10px] border border-[#ded2c8] bg-white p-3 sm:rounded-[13px] sm:p-4">
         <h2 className="mb-2 text-[17px] font-semibold sm:mb-4 sm:text-[22px]">ごはん</h2>
-        <div className="grid min-w-0 grid-cols-3 gap-2 sm:gap-3">
+        <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
           <MealField icon={<Sun size={24} />} label="朝" value={form.breakfast} placeholder="未入力" onChange={(value) => update("breakfast", value)} />
           <MealField icon={<Sun size={24} />} label="昼" value={form.lunch} placeholder="未入力" onChange={(value) => update("lunch", value)} />
           <MealField icon={<Moon size={24} />} label="夜" value={form.dinner} placeholder="未入力" onChange={(value) => update("dinner", value)} />
@@ -289,25 +308,6 @@ export function DiaryEditor({
           />
         </div>
 
-        <h2 className="mb-2 mt-3 text-[17px] font-semibold sm:mb-3 sm:mt-5 sm:text-[22px]">充実度</h2>
-        <div className="grid h-9 min-w-0 grid-cols-4 rounded-[9px] bg-[#f1f1f1] p-0.5 sm:h-[50px] sm:rounded-[12px] sm:p-1">
-          {fulfillmentOptions.map(([value, label]) => {
-            const active = form.fulfillment_level === value;
-            return (
-              <button
-                key={value}
-                type="button"
-                onClick={() => update("fulfillment_level", value)}
-                className={[
-                  "focus-ring rounded-[8px] text-[12px] font-semibold transition sm:rounded-[10px] sm:text-[21px]",
-                  active ? "bg-[#2f638f] text-white shadow-[0_8px_16px_rgba(47,99,143,0.22)]" : "text-[#5c5c5c]"
-                ].join(" ")}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
       </section>
 
       <section className="overflow-hidden rounded-[10px] border border-[#ded2c8] bg-white sm:rounded-[13px]">

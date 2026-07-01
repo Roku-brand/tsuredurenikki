@@ -10,7 +10,7 @@ import { verifyLockPinAction } from "@/server/actions/lock";
 export function LockForm({ pinConfigured }: { pinConfigured: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/app/today";
+  const next = params.get("next") || "/app/home";
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
 

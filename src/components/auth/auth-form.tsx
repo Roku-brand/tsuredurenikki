@@ -10,7 +10,7 @@ import { Field, Input } from "@/components/ui/field";
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
   const params = useSearchParams();
-  const next = useMemo(() => params.get("next") || "/app/today", [params]);
+  const next = useMemo(() => params.get("next") || "/app/home", [params]);
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
 
