@@ -132,6 +132,7 @@ function revalidateDiaryPaths() {
   revalidatePath("/app/today");
   revalidatePath("/app/calendar");
   revalidatePath("/app/search");
+  revalidatePath("/app/data");
   revalidatePath("/app/analysis");
   revalidatePath("/app/tags");
 }

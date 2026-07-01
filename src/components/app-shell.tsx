@@ -5,10 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarDays,
-  ChartNoAxesCombined,
+  Database,
+  Home,
   LockKeyhole,
   NotebookPen,
-  Search,
   Settings
 } from "lucide-react";
 import { clsx } from "clsx";
@@ -18,8 +18,8 @@ import type { AppSettings, Profile } from "@/types/database";
 const navItems = [
   { href: "/app/calendar", label: "カレンダー", icon: CalendarDays },
   { href: "/app/today", label: "記帳", icon: NotebookPen },
-  { href: "/app/search", label: "検索", icon: Search },
-  { href: "/app/analysis", label: "分析", icon: ChartNoAxesCombined },
+  { href: "/app/home", label: "ホーム", icon: Home },
+  { href: "/app/data", label: "データ", icon: Database },
   { href: "/app/settings", label: "設定", icon: Settings }
 ];
 
