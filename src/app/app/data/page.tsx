@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SearchIcon } from "lucide-react";
+import { DataTabs } from "@/components/data/data-tabs";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/field";
 import { Panel, SectionHeader } from "@/components/ui/card";
@@ -34,19 +35,18 @@ export default async function DataPage({
   const filters = parseFilters(params);
   const searched = single(params.searched) === "1";
   const period = periods.some((item) => item.value === single(params.period)) ? (single(params.period) as AnalysisPeriod) : "30d";
-  const results = tab === "search" && searched ? await searchDiaryEntries(user.id, filters) : [];
-  const analysis = tab === "analysis" ? await getAnalysis(user.id, period) : null;
+  const [results, analysis] = await Promise.all([
+    searched ? searchDiaryEntries(user.id, filters) : Promise.resolve([]),
+    getAnalysis(user.id, period)
+  ]);
 
   return (
     <div className="grid gap-5">
       <SectionHeader title="データ" />
 
-      <div className="flex rounded-lg bg-[var(--surface-muted)] p-1">
-        <TabLink active={tab === "search"} href="/app/data?tab=search">検索</TabLink>
-        <TabLink active={tab === "analysis"} href="/app/data?tab=analysis">分析</TabLink>
-      </div>
-
-      {tab === "search" ? (
+      <DataTabs
+        initialTab={tab}
+        search={
         <section className="grid gap-4">
           <Panel>
             <form className="grid gap-3" action="/app/data">
@@ -113,9 +113,8 @@ export default async function DataPage({
             </section>
           ) : null}
         </section>
-      ) : null}
-
-      {tab === "analysis" && analysis ? (
+        }
+        analysis={
         <section className="grid gap-4">
           <Panel>
             <form action="/app/data" className="flex max-w-sm items-end gap-2">
@@ -170,22 +169,9 @@ export default async function DataPage({
             </div>
           </Panel>
         </section>
-      ) : null}
+        }
+      />
     </div>
-  );
-}
-
-function TabLink({ active, href, children }: { active: boolean; href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className={[
-        "focus-ring flex-1 rounded-md px-4 py-2 text-center text-sm font-semibold transition",
-        active ? "bg-[var(--surface)] text-lake shadow-sm" : "text-neutral-500"
-      ].join(" ")}
-    >
-      {children}
-    </Link>
   );
 }
 
