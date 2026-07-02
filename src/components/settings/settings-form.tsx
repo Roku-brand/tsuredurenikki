@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, ChevronRight, Download, LogOut, Save, Shield, Upload, UserRound } from "lucide-react";
+import { Bell, ChevronRight, Download, LockKeyhole, LogOut, Save, Shield, Upload, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/field";
 import { exportJsonAction, importJsonAction } from "@/server/actions/import-export";
@@ -18,6 +18,7 @@ export function SettingsForm({ profile, settings }: { profile: Profile; settings
   const [payload, setPayload] = useState<unknown>(null);
   const [mode, setMode] = useState<"skip" | "overwrite">("skip");
   const [notificationPermission, setNotificationPermission] = useState("unsupported");
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const preview = useMemo(() => {
@@ -28,6 +29,7 @@ export function SettingsForm({ profile, settings }: { profile: Profile; settings
 
   useEffect(() => {
     if ("Notification" in window) setNotificationPermission(Notification.permission);
+    setNotificationsEnabled(localStorage.getItem("zezehibi:notifications-enabled") === "true");
   }, []);
 
   function exportJson() {
@@ -91,7 +93,13 @@ export function SettingsForm({ profile, settings }: { profile: Profile; settings
     });
   }
 
-  function requestNotifications() {
+  function toggleNotifications() {
+    if (notificationsEnabled) {
+      localStorage.setItem("zezehibi:notifications-enabled", "false");
+      setNotificationsEnabled(false);
+      setMessage("通知をOFFにしました。");
+      return;
+    }
     if (!("Notification" in window)) {
       setMessage("このブラウザは通知に対応していません。");
       return;
@@ -99,7 +107,10 @@ export function SettingsForm({ profile, settings }: { profile: Profile; settings
     startTransition(async () => {
       const permission = await Notification.requestPermission();
       setNotificationPermission(permission);
-      setMessage(permission === "granted" ? "通知を許可しました。" : "通知は許可されていません。");
+      const enabled = permission === "granted";
+      localStorage.setItem("zezehibi:notifications-enabled", String(enabled));
+      setNotificationsEnabled(enabled);
+      setMessage(enabled ? "通知をONにしました。" : "通知は許可されていません。");
     });
   }
 
@@ -143,7 +154,39 @@ export function SettingsForm({ profile, settings }: { profile: Profile; settings
             </Button>
           </div>
         </SettingRow>
-        <SettingRow icon={<UserRound size={21} />} title="アカウント管理" detail="ロック、PIN、ログアウト">
+        <SettingRow icon={<UserRound size={21} />} title="アカウント管理" detail={profile.display_name || "ユーザー"}>
+          <div className="grid gap-3">
+            <div className="rounded-lg bg-[var(--surface-muted)] px-3 py-2 text-sm">
+              <p className="text-neutral-500">ユーザー名</p>
+              <p className="font-semibold">{profile.display_name || "未設定"}</p>
+            </div>
+            <Button type="button" variant="secondary" onClick={signOut} disabled={isPending}>
+              <LogOut size={16} />
+              ログアウト
+            </Button>
+          </div>
+        </SettingRow>
+        <SettingRow icon={<Bell size={21} />} title="通知設定" detail={notificationsEnabled ? "ON" : "OFF"}>
+          <button
+            type="button"
+            onClick={toggleNotifications}
+            disabled={isPending}
+            className={[
+              "relative h-7 w-12 rounded-full transition disabled:opacity-60",
+              notificationsEnabled ? "bg-[#3b82f6]" : "bg-neutral-300"
+            ].join(" ")}
+            aria-pressed={notificationsEnabled}
+          >
+            <span
+              className={[
+                "absolute top-1 size-5 rounded-full bg-white shadow transition",
+                notificationsEnabled ? "left-6" : "left-1"
+              ].join(" ")}
+            />
+          </button>
+          <p className="mt-2 text-xs text-neutral-500">ブラウザ許可状態: {notificationPermission}</p>
+        </SettingRow>
+        <SettingRow icon={<LockKeyhole size={21} />} title="プライバシー" detail="ロックとPIN">
           <div className="grid gap-3">
             <label className="flex items-center justify-between gap-3 text-sm font-medium">
               <span>アプリ内ロック</span>
@@ -168,17 +211,7 @@ export function SettingsForm({ profile, settings }: { profile: Profile; settings
               <Shield size={16} />
               PINを保存
             </Button>
-            <Button type="button" variant="secondary" onClick={signOut} disabled={isPending}>
-              <LogOut size={16} />
-              ログアウト
-            </Button>
           </div>
-        </SettingRow>
-        <SettingRow icon={<Bell size={21} />} title="通知設定" detail={`許可状態: ${notificationPermission}`}>
-          <Button type="button" onClick={requestNotifications} disabled={isPending || notificationPermission === "granted"}>
-            <Bell size={16} />
-            通知を許可
-          </Button>
         </SettingRow>
       </section>
 

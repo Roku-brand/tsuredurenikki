@@ -267,27 +267,25 @@ export function DiaryEditor({
         </div>
       </header>
 
-      <input
-        type="text"
-        value={form.title}
-        onChange={(event) => update("title", event.target.value)}
-        placeholder="今日の題名"
-        className="focus-ring h-11 rounded-[10px] border border-[#ded2c8] bg-white px-3 text-[17px] outline-none placeholder:text-[#8b8b8b] sm:h-[62px] sm:rounded-[13px] sm:px-4 sm:text-[22px]"
-      />
-
       <section className="rounded-[10px] border border-[#ded2c8] bg-white p-3 sm:rounded-[13px] sm:p-4">
-        <h2 className="mb-2 text-[17px] font-semibold sm:mb-4 sm:text-[22px]">本文</h2>
+        <input
+          type="text"
+          value={form.title}
+          onChange={(event) => update("title", event.target.value)}
+          placeholder="今日の題名"
+          className="focus-ring mb-2 h-9 w-full border-0 border-b border-[#e7dcd4] bg-transparent px-1 text-[15px] font-semibold outline-none placeholder:text-[#8b8b8b] sm:mb-3 sm:h-12 sm:text-[20px]"
+        />
         <textarea
           value={form.body}
           onChange={(event) => update("body", event.target.value)}
           placeholder="今日の出来事や感じたこと"
-          className="focus-ring min-h-[124px] w-full resize-y rounded-[9px] border border-[#ded2c8] bg-white px-3 py-2.5 text-[15px] leading-6 outline-none placeholder:text-[#8b8b8b] sm:min-h-[220px] sm:rounded-[11px] sm:px-4 sm:py-4 sm:text-[19px] sm:leading-8"
+          className="focus-ring min-h-[132px] w-full resize-y rounded-[8px] border border-[#eadfd8] bg-[linear-gradient(to_bottom,transparent_0,transparent_27px,#eadfd8_28px)] bg-[length:100%_28px] px-2.5 py-1.5 text-[13px] leading-7 outline-none placeholder:text-[#8b8b8b] sm:min-h-[220px] sm:rounded-[11px] sm:bg-[length:100%_32px] sm:px-4 sm:py-2 sm:text-[17px] sm:leading-8"
         />
       </section>
 
       <section className="rounded-[10px] border border-[#ded2c8] bg-white p-3 sm:rounded-[13px] sm:p-4">
         <h2 className="mb-2 text-[17px] font-semibold sm:mb-4 sm:text-[22px]">ごはん</h2>
-        <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
+        <div className="grid min-w-0 grid-cols-3 gap-1.5 sm:gap-3">
           <MealField icon={<Sun size={24} />} label="朝" value={form.breakfast} placeholder="未入力" onChange={(value) => update("breakfast", value)} />
           <MealField icon={<Sun size={24} />} label="昼" value={form.lunch} placeholder="未入力" onChange={(value) => update("lunch", value)} />
           <MealField icon={<Moon size={24} />} label="夜" value={form.dinner} placeholder="未入力" onChange={(value) => update("dinner", value)} />
@@ -356,14 +354,14 @@ function MealField({
   onChange: (value: string) => void;
 }) {
   return (
-    <label className="grid min-h-[54px] min-w-0 grid-cols-[20px_1fr] gap-x-1.5 rounded-[8px] border border-[#ded2c8] px-2 py-2 sm:min-h-[78px] sm:grid-cols-[30px_1fr] sm:gap-x-2 sm:rounded-[10px] sm:px-3 sm:py-3">
-      <span className="row-span-2 shrink-0 text-[#202124] [&>svg]:size-4 sm:[&>svg]:size-6">{icon}</span>
-      <span className="text-[12px] font-semibold sm:text-[15px]">{label}</span>
+    <label className="grid min-h-[48px] min-w-0 grid-cols-1 rounded-[8px] border border-[#ded2c8] px-1.5 py-1.5 sm:min-h-[78px] sm:grid-cols-[30px_1fr] sm:gap-x-2 sm:rounded-[10px] sm:px-3 sm:py-3">
+      <span className="hidden row-span-2 shrink-0 text-[#202124] sm:block sm:[&>svg]:size-6">{icon}</span>
+      <span className="text-[11px] font-semibold sm:text-[15px]">{label}</span>
       <input
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="min-w-0 bg-transparent text-[13px] font-semibold outline-none placeholder:font-medium placeholder:text-[#8b8b8b] sm:text-[19px]"
+        className="min-w-0 bg-transparent text-[12px] font-semibold leading-5 outline-none placeholder:font-medium placeholder:text-[#8b8b8b] sm:text-[19px]"
       />
     </label>
   );
